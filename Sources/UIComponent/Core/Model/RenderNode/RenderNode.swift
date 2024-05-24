@@ -148,7 +148,7 @@ extension RenderNode {
         return updateView(view)
     }
 
-    internal func _visibleRenderables(in frame: CGRect) -> [Renderable] {
+    public func _visibleRenderables(in frame: CGRect) -> [Renderable] {
         var result = [Renderable]()
         if shouldRenderView {
             result.append(Renderable(id: id ?? defaultReuseKey, frame: CGRect(origin: .zero, size: size), renderNode: self))
