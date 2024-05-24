@@ -2,6 +2,7 @@
 
 
 import UIKit
+import Perception
 
 /// Protocol defining a delegate responsible for determining if a component view should be reloaded.
 public protocol ComponentReloadDelegate: AnyObject {
@@ -180,14 +181,21 @@ public class ComponentEngine {
             }
         }
 
-        if skipNextLayout {
-            skipNextLayout = false
-            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            render(updateViews: true)
-        } else if asyncLayout {
-            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-        } else {
-            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        
+        withPerceptionTracking {
+            if skipNextLayout {
+                skipNextLayout = false
+                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                render(updateViews: true)
+            } else if asyncLayout {
+                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            } else {
+                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            }
+        } onChange: { [weak self] in
+            RunLoop.main.perform { [weak self] in
+                self?.reloadData()
+            }
         }
     }
 
@@ -215,7 +223,7 @@ public class ComponentEngine {
         let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
             component.layout(Constraint(maxSize: adjustedSize))
         }
-        
+
         didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
     }
 
