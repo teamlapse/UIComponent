@@ -2,43 +2,26 @@
 
 import UIComponent
 import UIKit
-import Perception
 
 class ViewController: ComponentViewController {
-    let model = PlaygroundModel()
-
     override var component: any Component {
-        PlaygroundView(model: model)
-            .view()
-    }
-}
-
-@Perceptible
-class PlaygroundModel {
-    var text: String = "hey"
-}
-
-struct PlaygroundView: ComponentBuilder {
-    let model: PlaygroundModel
-
-    func build() -> some Component {
-        let _ = print("BUILDING PLAYGROUND VIEW")
-        return VStack {
-            Test(model: model)
-                .view()
-        }
-    }
-}
-
-struct Test: ComponentBuilder {
-    let model: PlaygroundModel
-
-    func build() -> some Component {
-        let _ = print("BUILDING TEXT: \(model.text)")
-        return Text(model.text)
-            .tappableView {
-                model.text = "testinggg + \(Int.random(in: 0..<1000))"
+        VStack {
+            Join {
+                ExampleItem(name: "Perception Example", viewController: PerceptionViewController())
+                ExampleItem(name: "Card Example", viewController: CardViewController())
+                ExampleItem(name: "Card Example 2", viewController: CardViewController2())
+                ExampleItem(name: "Card Example 3", viewController: CardViewController3())
+                ExampleItem(name: "AsyncImage Example", viewController: UINavigationController(rootViewController: AsyncImageViewController()))
+                ExampleItem(name: "Flex Layout Example", viewController: FlexLayoutViewController())
+                ExampleItem(name: "Waterfall Layout Example", viewController: WaterfallLayoutViewController())
+                ExampleItem(name: "Badge Example", viewController: BadgeViewController())
+                ExampleItem(name: "Complex Example", viewController: ComplexLayoutViewController())
+                ExampleItem(name: "Custom Layout Example", viewController: GalleryViewController())
+                ExampleItem(name: "Size Example", viewController: SizeExampleViewController())
+            } separator: {
+                Separator()
             }
+        }.viewController(self)
     }
 }
 
@@ -60,7 +43,6 @@ struct ExampleItem: ComponentBuilder {
         }
         .inset(20)
         .tappableView { [weak parentViewController] in
-            print("Test")
             parentViewController?.present(viewController(), animated: true)
         }
     }

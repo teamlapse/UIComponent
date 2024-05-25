@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D0C45542C021A86007E8277 /* PerceptionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C45532C021A86007E8277 /* PerceptionViewController.swift */; };
 		A304892821C347010026EDA7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A304892721C347010026EDA7 /* AppDelegate.swift */; };
 		A304892A21C347010026EDA7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A304892921C347010026EDA7 /* ViewController.swift */; };
 		A304892D21C347010026EDA7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A304892B21C347010026EDA7 /* Main.storyboard */; };
@@ -53,6 +54,7 @@
 
 /* Begin PBXFileReference section */
 		024B130A23E7B312004F4D00 /* UIComponent */ = {isa = PBXFileReference; lastKnownFileType = folder; name = UIComponent; path = ..; sourceTree = "<group>"; };
+		8D0C45532C021A86007E8277 /* PerceptionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerceptionViewController.swift; sourceTree = "<group>"; };
 		A304892421C347010026EDA7 /* UIComponentExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UIComponentExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A304892721C347010026EDA7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A304892921C347010026EDA7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -103,6 +105,14 @@
 				024B130A23E7B312004F4D00 /* UIComponent */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8D0C45522C021A71007E8277 /* Perception */ = {
+			isa = PBXGroup;
+			children = (
+				8D0C45532C021A86007E8277 /* PerceptionViewController.swift */,
+			);
+			path = Perception;
 			sourceTree = "<group>";
 		};
 		A304891B21C347010026EDA7 = {
@@ -182,6 +192,7 @@
 		B1CC3F6C267800B9005BCE8C /* Examples */ = {
 			isa = PBXGroup;
 			children = (
+				8D0C45522C021A71007E8277 /* Perception */,
 				B1CC3F6A2678009C005BCE8C /* AsyncImage */,
 				B1CC3F692678008F005BCE8C /* Card */,
 				F8E3DD0F26A7BC5F0062E58F /* Complex layout */,
@@ -323,6 +334,7 @@
 				B1CC3F7226789F07005BCE8C /* AddCardButton.swift in Sources */,
 				F8E3DD1526A7BC5F0062E58F /* UserProfile.swift in Sources */,
 				F839CC0E26A90DDF00392BCE /* IntroductionCard.swift in Sources */,
+				8D0C45542C021A86007E8277 /* PerceptionViewController.swift in Sources */,
 				F8E3DD1626A7BC5F0062E58F /* ComplexLayoutViewController.swift in Sources */,
 				B1B079EE26AB398E003BEAFB /* WaterfallLayoutViewController.swift in Sources */,
 				B1CC3F632677FCFD005BCE8C /* CardViewController.swift in Sources */,

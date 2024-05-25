@@ -181,7 +181,6 @@ public class ComponentEngine {
             }
         }
 
-        
         withPerceptionTracking {
             if skipNextLayout {
                 skipNextLayout = false
@@ -219,6 +218,7 @@ public class ComponentEngine {
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
         guard let componentView = view, let component else { return }
+
 
         let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
             component.layout(Constraint(maxSize: adjustedSize))
