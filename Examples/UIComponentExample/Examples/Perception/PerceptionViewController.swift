@@ -139,8 +139,12 @@ struct ImageContainer: ComponentBuilder {
                 ])
             }
             .overlay {
-                Text("\(image.likes)")
-                    .textColor(.red)
+                ZStack(verticalAlignment: .center, horizontalAlignment: .center) {
+                    Text("\(image.likes)")
+                        .textColor(.red)
+                        .font(.boldSystemFont(ofSize: 20))
+                }
+                .fill()
             }
 
     }
