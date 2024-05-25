@@ -73,7 +73,8 @@ struct PerceptionScreen: ComponentBuilder {
                 /// however, it will never reinvoke the view controllers `component` or `reloadComponent` as that is not in the engine
 
                 ImageContainer(model: model, image: image, index: index)
-                    /// Adds a "break" in the heirarchy, so that ImageContainer only needs to reload its own content
+                    /// Adds a "break" in the heirarchy, so that ImageContainer only needs to reload its own content, has to be added outside of the init of the struct instead of inside the structs `build()` method
+                    /// `build()` is called by the engine, which is embedded in a `withPerceptionTracking` so we need to ensure this whole block is contained in it's own ComponentView
                     .perceptionView()
                     /// Because we wrap in a ViewComponent for perceptionView we lose sizing information, meaning we need to explicitly set the size
                     .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
