@@ -77,6 +77,7 @@ struct PerceptionScreen: ComponentBuilder {
                     .perceptionView()
                     /// Because we wrap in a ViewComponent for perceptionView we lose sizing information, meaning we need to explicitly set the size
                     .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
+                    .id(image.url.absoluteString)
             }
         }
     }
@@ -116,7 +117,7 @@ struct ImageContainer: ComponentBuilder {
                 Text("\(image.likes)")
                     .textColor(.red)
             }
-            .id(image.url.absoluteString)
+
     }
 }
 
