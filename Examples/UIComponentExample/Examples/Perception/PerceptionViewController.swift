@@ -156,11 +156,11 @@ struct ImageContainer: ComponentBuilder {
 extension Component {
     func perceptionView() -> some Component<ViewComponent<ComponentView>> {
         ViewComponent<ComponentView>()
-            .component(self.environment(\.self, value: EnvironmentValues.current))
+            .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
     }
 
     func perceptionScrollView() -> some Component<ViewComponent<ComponentScrollView>>  {
         ViewComponent<ComponentScrollView>()
-            .component(self.environment(\.self, value: EnvironmentValues.current))
+            .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
     }
 }
