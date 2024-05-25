@@ -37,6 +37,8 @@ public struct AsyncImage: ComponentBuilder {
         ViewComponent<UIImageView>()
             .update {
                 $0.kf.indicatorType = indicatorType
+                $0.contentMode = .scaleAspectFill
+                $0.clipsToBounds = true
                 if let configurationBuilder = configurationBuilder {
                     configurationBuilder(KF.url(url)).set(to: $0)
                 } else {

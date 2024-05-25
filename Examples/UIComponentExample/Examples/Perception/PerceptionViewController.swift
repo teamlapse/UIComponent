@@ -25,7 +25,7 @@ class PerceptionModel {
     var images = [
         PerceptionImage(
             url: URL(string: "https://unsplash.com/photos/Yn0l7uwBrpw/download?force=true&w=640")!,
-            size: CGSize(width: 640, height: 360)
+            size: CGSize(width: 640, height: 427)
         ),
         PerceptionImage(
             url: URL(string: "https://unsplash.com/photos/J4-xolC4CCU/download?force=true&w=640")!,
@@ -45,6 +45,30 @@ class PerceptionModel {
         ),
         PerceptionImage(
             url: URL(string: "https://unsplash.com/photos/MOfETox0bkE/download?force=true&w=640")!,
+            size: CGSize(width: 640, height: 426)
+        ),
+        PerceptionImage(
+            url: URL(string: "https://unsplash.com/photos/Ga7aBzN7qDw/download?force=true&w=640")!,
+            size: CGSize(width: 640, height: 427)
+        ),
+        PerceptionImage(
+            url: URL(string: "https://unsplash.com/photos/kbv1PTv_1SM/download?force=true&w=640")!,
+            size: CGSize(width: 640, height: 800)
+        ),
+        PerceptionImage(
+            url: URL(string: "https://unsplash.com/photos/zLNgFaJNANo/download?force=true&w=640")!,
+            size: CGSize(width: 640, height: 434)
+        ),
+        PerceptionImage(
+            url: URL(string: "https://unsplash.com/photos/O0pcpmaR4eA/download?force=true&w=640")!,
+            size: CGSize(width: 640, height: 959)
+        ),
+        PerceptionImage(
+            url: URL(string: "https://unsplash.com/photos/-jOic-c0jK0/download?force=true&w=640")!,
+            size: CGSize(width: 640, height: 426)
+        ),
+        PerceptionImage(
+            url: URL(string: "https://unsplash.com/photos/kI-DsaRmg-Q/download?force=true&w=640")!,
             size: CGSize(width: 640, height: 426)
         ),
     ]
