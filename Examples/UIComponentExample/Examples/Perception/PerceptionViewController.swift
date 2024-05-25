@@ -6,7 +6,8 @@ class PerceptionViewController: ComponentViewController {
     let model = PerceptionModel()
 
     override var component: any Component {
-        PerceptionScreen(model: model)
+        print("RELOADING SCREEN")
+        return PerceptionScreen(model: model)
             .viewController(self)
     }
 
@@ -91,7 +92,8 @@ struct PerceptionScreen: ComponentBuilder {
     let model: PerceptionModel
 
     func build() -> some Component {
-        Waterfall(columns: 2, spacing: 1) {
+        print("RELOADING WATERFALL")
+        return Waterfall(columns: 2, spacing: 1) {
             for (index, image) in model.images.enumerated() {
                 /// Try commenting the two lines below the image container to see how it then grabs the root scroll view and tells that to reload
                 /// however, it will never reinvoke the view controllers `component` or `reloadComponent` as that is not in the engine
@@ -100,8 +102,9 @@ struct PerceptionScreen: ComponentBuilder {
                     /// Adds a "break" in the heirarchy, so that ImageContainer only needs to reload its own content, has to be added outside of the init of the struct instead of inside the structs `build()` method
                     /// `build()` is called by the engine, which is embedded in a `withPerceptionTracking` so we need to ensure this whole block is contained in it's own ComponentView
                     .perceptionView()
-                    /// Because we wrap in a ViewComponent for perceptionView we lose sizing information, meaning we need to explicitly set the size
+                    /// Because we wrap in a ViewComponent for perceptionView we lose sizing information, meaning we need to explicitly set the size, not ideal at all
                     .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
+                    /// Needed for the animator to correct work out what should go where when things move around
                     .id(image.url.absoluteString)
             }
         }
