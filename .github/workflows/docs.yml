@@ -29,6 +29,7 @@ jobs:
       uses: actions/configure-pages@v4
     - name: Generate Docs
       run: |
+        defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
         xcrun xcodebuild docbuild \
         -scheme UIComponent \
         -destination 'generic/platform=iOS Simulator' \
