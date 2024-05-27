@@ -22,11 +22,12 @@ UIComponent is a declarative and modern framework to build user interfaces with 
 ### Advanced Topics
 
 @Links(visualStyle: list) {
-- <doc:CustomComponent>
-- <doc:Animation>
-- <doc:Architecture>
-- <doc:SwiftUICompare>
-- <doc:PerformanceOptimization>
-- <doc:Component>
-- <doc:Environment>
+    - <doc:CustomComponent>
+    - <doc:Animation>
+    - <doc:Architecture>
+    - <doc:SwiftUICompare>
+    - <doc:PerformanceOptimization>
+    - <doc:Component>
+    - <doc:Environment>
+    - <doc:Perception>
 }
