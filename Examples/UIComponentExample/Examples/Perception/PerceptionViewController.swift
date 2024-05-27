@@ -9,7 +9,7 @@ class PerceptionViewController: ComponentViewController {
         print("RELOADING SCREEN")
         return PerceptionScreen(model: model)
             .viewController(self) /// Environment will be passed down as environment is captured first view before we wrap in ViewComponent
-            .perceptionScrollViewFill()
+
 //            .viewController(self) /// Environment would not be passed down as perception view is called first and the env wouldn't be set
     }
 
@@ -108,6 +108,7 @@ struct PerceptionScreen: ComponentBuilder {
                     .id(image.url.absoluteString)
             }
         }
+        .perceptionScrollViewFill()
     }
 }
 

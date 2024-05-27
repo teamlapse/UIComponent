@@ -3,7 +3,7 @@
 import Foundation
 
 public extension Component {
-    private func perceptionView() -> ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>> {
+    internal func perceptionView() -> ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>> {
         ViewComponent<ComponentView>()
             .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
     }
@@ -42,7 +42,7 @@ public extension Component {
 }
 
 public extension Component {
-    private func perceptionScrollView() -> ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>> {
+    internal func perceptionScrollView() -> ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>> {
         ViewComponent<ComponentScrollView>()
             .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
     }
