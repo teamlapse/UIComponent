@@ -4,19 +4,24 @@ import UIComponent
 import UIKit
 
 class ComponentViewController: UIViewController {
-    let componentView = ComponentScrollView()
+    let componentView = ComponentView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        componentView.contentInsetAdjustmentBehavior = .always
         view.backgroundColor = .systemBackground
         view.addSubview(componentView)
+        componentView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            componentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            componentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            componentView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            componentView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+        ])
         reloadComponent()
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        componentView.frame = view.bounds
     }
 
     func reloadComponent() {

@@ -8,7 +8,9 @@ class PerceptionViewController: ComponentViewController {
     override var component: any Component {
         print("RELOADING SCREEN")
         return PerceptionScreen(model: model)
-            .viewController(self)
+            .viewController(self) /// Environment will be passed down as environment is captured first view before we wrap in ViewComponent
+            .perceptionScrollViewFill()
+//            .viewController(self) /// Environment would not be passed down as perception view is called first and the env wouldn't be set
     }
 
     override func viewDidLoad() {
@@ -101,9 +103,7 @@ struct PerceptionScreen: ComponentBuilder {
                 ImageContainer(model: model, image: image, index: index)
                     /// Adds a "break" in the heirarchy, so that ImageContainer only needs to reload its own content, has to be added outside of the init of the struct instead of inside the structs `build()` method
                     /// `build()` is called by the engine, which is embedded in a `withPerceptionTracking` so we need to ensure this whole block is contained in it's own ComponentView
-                    .perceptionView()
-                    /// Because we wrap in a ViewComponent for perceptionView we lose sizing information, meaning we need to explicitly set the size, not ideal at all
-                    .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
+                    .perceptionView(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
                     /// Needed for the animator to correct work out what should go where when things move around
                     .id(image.url.absoluteString)
             }
@@ -120,6 +120,7 @@ struct ImageContainer: ComponentBuilder {
 
     func build() -> some Component {
         print("IMAGE RELOADING: \(index)")
+        print("HAS ENV: \(viewController != nil)")
         return AsyncImage(image.url)
             .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
             .tappableView { [weak viewController] in
@@ -149,18 +150,6 @@ struct ImageContainer: ComponentBuilder {
                 }
                 .fill()
             }
-
-    }
-}
-
-extension Component {
-    func perceptionView() -> some Component<ViewComponent<ComponentView>> {
-        ViewComponent<ComponentView>()
-            .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
-    }
-
-    func perceptionScrollView() -> some Component<ViewComponent<ComponentScrollView>>  {
-        ViewComponent<ComponentScrollView>()
-            .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
+//            .perceptionView() /// Using perception view inside of here will not work correctly, any access to `model/image` with perception will be tracked as the parent's control, which would reload `PerceptionScreen` instead. You need to wrap content `Component` or `ComponentBuilder` struct first and then call `perceptionView()` on the struct not inside the structs `layout` or `build` methods
     }
 }
