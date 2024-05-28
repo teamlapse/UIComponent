@@ -14,7 +14,7 @@ extension Component {
             .size(width: width, height: height)
     }
 
-    typealias PerceptionViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>>>
+    public typealias PerceptionViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>>>
 }
 
 extension Component {
@@ -29,7 +29,7 @@ extension Component {
             .size(width: width, height: height)
     }
 
-    typealias PerceptionScrollViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>>>
+    public typealias PerceptionScrollViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>>>
 }
 
 
@@ -44,7 +44,7 @@ public struct ObservableComponent<C: Component>: ComponentBuilder {
         self.height = height
     }
 
-    public func build() -> some Component {
+    public func build() -> PerceptionViewWithSize {
         component
             .perceptionView(width: width, height: height)
     }
@@ -82,7 +82,7 @@ public struct ObservableScrollComponent<C: Component>: ComponentBuilder {
         self.height = height
     }
 
-    public func build() -> some Component {
+    public func build() -> PerceptionScrollViewWithSize {
         component
             .perceptionScrollView(width: width, height: height)
     }
