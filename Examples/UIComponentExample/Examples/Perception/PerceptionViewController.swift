@@ -7,10 +7,12 @@ class PerceptionViewController: ComponentViewController {
 
     override var component: any Component {
         print("RELOADING SCREEN")
-        return PerceptionScreen(model: model)
-            .viewController(self) /// Environment will be passed down as environment is captured first view before we wrap in ViewComponent
-
-//            .viewController(self) /// Environment would not be passed down as perception view is called first and the env wouldn't be set
+        return ObservableComponent(
+            component: PerceptionScreen(model: model),
+            width: .fill,
+            height: .fill
+        )
+        .viewController(self) /// Environment will be passed down as environment is captured first view before we wrap in ViewComponent
     }
 
     override func viewDidLoad() {
@@ -95,20 +97,28 @@ struct PerceptionScreen: ComponentBuilder {
 
     func build() -> some Component {
         print("RELOADING WATERFALL")
-        return Waterfall(columns: 2, spacing: 1) {
-            for (index, image) in model.images.enumerated() {
-                /// Try commenting the two lines below the image container to see how it then grabs the root scroll view and tells that to reload
-                /// however, it will never reinvoke the view controllers `component` or `reloadComponent` as that is not in the engine
+        return ObservableScrollComponent(
+            component: WaterfallComponent(model: model),
+            width: .fill,
+            height: .fill
+        )
+    }
 
-                ImageContainer(model: model, image: image, index: index)
-                    /// Adds a "break" in the heirarchy, so that ImageContainer only needs to reload its own content, has to be added outside of the init of the struct instead of inside the structs `build()` method
-                    /// `build()` is called by the engine, which is embedded in a `withPerceptionTracking` so we need to ensure this whole block is contained in it's own ComponentView
-                    .perceptionView(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
-                    /// Needed for the animator to correct work out what should go where when things move around
+    struct WaterfallComponent: ComponentBuilder {
+        let model: PerceptionModel
+
+        func build() -> some Component {
+            Waterfall(columns: 2, spacing: 1) {
+                for (index, image) in model.images.enumerated() {
+                    ObservableComponent(
+                        component: ImageContainer(model: model, image: image, index: index),
+                        width: .fill,
+                        height: .aspectPercentage(image.size.height / image.size.width)
+                    )
                     .id(image.url.absoluteString)
+                }
             }
         }
-        .perceptionScrollViewFill()
     }
 }
 

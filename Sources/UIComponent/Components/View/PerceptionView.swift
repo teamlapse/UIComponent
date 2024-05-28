@@ -2,8 +2,8 @@
 
 import Foundation
 
-public extension Component {
-    internal func perceptionView() -> ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>> {
+extension Component {
+    func perceptionView() -> ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>> {
         ViewComponent<ComponentView>()
             .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
     }
@@ -14,35 +14,11 @@ public extension Component {
             .size(width: width, height: height)
     }
 
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionView(width: CGFloat, height: SizeStrategy = .fit) -> PerceptionViewWithSize {
-        perceptionView()
-            .size(width: width, height: height)
-    }
-
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionView(width: SizeStrategy = .fit, height: CGFloat) -> PerceptionViewWithSize {
-        perceptionView()
-            .size(width: width, height: height)
-    }
-
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionView(width: CGFloat, height: CGFloat) -> PerceptionViewWithSize {
-        perceptionView()
-            .size(width: width, height: height)
-    }
-
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionViewFill() -> PerceptionViewWithSize {
-        perceptionView()
-            .fill()
-    }
-
     typealias PerceptionViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>>>
 }
 
-public extension Component {
-    internal func perceptionScrollView() -> ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>> {
+extension Component {
+    func perceptionScrollView() -> ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>> {
         ViewComponent<ComponentScrollView>()
             .component(self.environment(\.self, value: EnvironmentValues.current)) /// Required to forward the environment down the chain, otherwise you can't access the interactors
     }
@@ -53,29 +29,81 @@ public extension Component {
             .size(width: width, height: height)
     }
 
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionScrollView(width: CGFloat, height: SizeStrategy = .fit) -> PerceptionScrollViewWithSize {
-        perceptionScrollView()
-            .size(width: width, height: height)
-    }
-
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionScrollView(width: SizeStrategy = .fit, height: CGFloat) -> PerceptionScrollViewWithSize {
-        perceptionScrollView()
-            .size(width: width, height: height)
-    }
-
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionScrollView(width: CGFloat, height: CGFloat) -> PerceptionScrollViewWithSize {
-        perceptionScrollView()
-            .size(width: width, height: height)
-    }
-
-    /// Introduces a break in the heirachy where if the child components listen to model changes, then only this component and it's children will be called to reload
-    func perceptionScrollViewFill() -> PerceptionScrollViewWithSize {
-        perceptionScrollView()
-            .fill()
-    }
-
     typealias PerceptionScrollViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>>>
+}
+
+
+public struct ObservableComponent<C: Component>: ComponentBuilder {
+    let component: C
+    let width: SizeStrategy
+    let height: SizeStrategy
+
+    public init(component: C, width: SizeStrategy = .fill, height: SizeStrategy = .fill) {
+        self.component = component
+        self.width = width
+        self.height = height
+    }
+
+    public func build() -> some Component {
+        component
+            .perceptionView(width: width, height: height)
+    }
+}
+
+extension ObservableComponent {
+    public init(component: C, width: CGFloat, height: SizeStrategy) {
+        self.component = component
+        self.width = .absolute(width)
+        self.height = height
+    }
+
+    public init(component: C, width: SizeStrategy, height: CGFloat) {
+        self.component = component
+        self.width = width
+        self.height = .absolute(height)
+    }
+
+    public init(component: C, width: CGFloat, height: CGFloat) {
+        self.component = component
+        self.width = .absolute(width)
+        self.height = .absolute(height)
+    }
+}
+
+
+public struct ObservableScrollComponent<C: Component>: ComponentBuilder {
+    let component: C
+    let width: SizeStrategy
+    let height: SizeStrategy
+
+    public init(component: C, width: SizeStrategy = .fill, height: SizeStrategy = .fill) {
+        self.component = component
+        self.width = width
+        self.height = height
+    }
+
+    public func build() -> some Component {
+        component
+            .perceptionScrollView(width: width, height: height)
+    }
+}
+
+extension ObservableScrollComponent {
+    public init(component: C, width: CGFloat, height: SizeStrategy) {
+        self.component = component
+        self.width = .absolute(width)
+        self.height = height
+    }
+
+    public init(component: C, width: SizeStrategy, height: CGFloat) {
+        self.component = component
+        self.width = width
+        self.height = .absolute(height)
+    }
+
+    public init(component: C, width: CGFloat, height: CGFloat) {
+        self.component = component
+        self.width = .absolute(width)
+        self.height = .absolute(height)
+    }
 }
