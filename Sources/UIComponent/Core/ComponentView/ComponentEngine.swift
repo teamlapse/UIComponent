@@ -192,7 +192,7 @@ public class ComponentEngine {
                 layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
             }
         } onChange: { [weak self] in
-            RunLoop.main.perform { [weak self] in
+            RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
                 self?.reloadData()
             }
         }
