@@ -193,7 +193,7 @@ public class ComponentEngine {
             }
         } onChange: { [weak self] in
             RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
-                self?.reloadData()
+                self?.setNeedsReload()
             }
         }
     }
