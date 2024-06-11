@@ -167,9 +167,21 @@ public class ComponentEngine {
         view?.setNeedsLayout()
     }
 
+    private func _reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
+        if skipNextLayout {
+            skipNextLayout = false
+            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            render(updateViews: true)
+        } else if asyncLayout {
+            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        } else {
+            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        }
+    }
+    
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
-    func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
+    func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil, isTrackingObservation: Bool = false) {
         guard !isReloading, allowReload else { return }
         isReloading = true
         defer {
@@ -180,22 +192,19 @@ public class ComponentEngine {
                 onFirstReload()
             }
         }
-
-        withPerceptionTracking {
-            if skipNextLayout {
-                skipNextLayout = false
-                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-                render(updateViews: true)
-            } else if asyncLayout {
-                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            } else {
-                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            }
-        } onChange: { [weak self] in
-            RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
-                self?.reloadData()
+        
+        if reloadCount > 1, !isTrackingObservation {
+            _reloadData(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        } else {
+            withPerceptionTracking {
+                _reloadData(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            } onChange: {
+                RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
+                    self?.reloadData(isTrackingObservation: true)
+                }
             }
         }
+        
     }
 
     private var asyncLayoutID: UUID?
