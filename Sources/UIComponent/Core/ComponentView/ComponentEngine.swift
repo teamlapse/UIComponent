@@ -181,7 +181,7 @@ public class ComponentEngine {
     
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
-    func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil, isTrackingObservation: Bool = false) {
+    func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil, trackingObservation: Bool = false) {
         guard !isReloading, allowReload else { return }
         isReloading = true
         defer {
@@ -193,14 +193,14 @@ public class ComponentEngine {
             }
         }
         
-        if reloadCount > 1, !isTrackingObservation {
+        if reloadCount > 1, !trackingObservation {
             _reloadData(contentOffsetAdjustFn: contentOffsetAdjustFn)
         } else {
             withPerceptionTracking {
                 _reloadData(contentOffsetAdjustFn: contentOffsetAdjustFn)
             } onChange: {
                 RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
-                    self?.reloadData(isTrackingObservation: true)
+                    self?.reloadData(trackingObservation: true)
                 }
             }
         }
