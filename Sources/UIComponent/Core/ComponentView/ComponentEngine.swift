@@ -98,6 +98,8 @@ public class ComponentEngine {
         }
     }
 
+    fileprivate var token: ObservationToken?
+    
     /// A Boolean value that determines if the content view should be centered vertically.
     public var centerContentViewVertically = false
     
@@ -180,22 +182,16 @@ public class ComponentEngine {
                 onFirstReload()
             }
         }
-
-        withPerceptionTracking {
-            if skipNextLayout {
-                skipNextLayout = false
-                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-                render(updateViews: true)
-            } else if asyncLayout {
-                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            } else {
-                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            }
-        } onChange: { [weak self] in
-            RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
-                self?.setNeedsReload()
-            }
+        if skipNextLayout {
+            skipNextLayout = false
+            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            render(updateViews: true)
+        } else if asyncLayout {
+            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        } else {
+            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
         }
+        
     }
 
     private var asyncLayoutID: UUID?
@@ -218,13 +214,16 @@ public class ComponentEngine {
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
         guard let componentView = view, let component else { return }
-
-
-        let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
-            component.layout(Constraint(maxSize: adjustedSize))
+        
+        
+        observe { [weak self] in
+            guard let self else { return }
+            let adjustedSize = self.adjustedSize
+            let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
+                component.layout(Constraint(maxSize:adjustedSize))
+            }
+            didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
         }
-
-        didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
     }
 
     private func didFinishLayout(renderNode: any RenderNode, contentOffsetAdjustFn: (() -> CGPoint)?) {
@@ -386,4 +385,45 @@ public class ComponentEngine {
         self.renderNode = renderNode
         self.skipNextLayout = true
     }
+    
+
+}
+
+extension ComponentEngine {
+    
+    final class ObservationToken {
+        private var _isCancelled = false
+        fileprivate var isCancelled: Bool { _isCancelled }
+        
+        public func cancel() {
+            self._isCancelled = true
+        }
+        
+        deinit {
+            self.cancel()
+        }
+    }
+    
+    func onChange(apply: @escaping () -> Void) {
+        let token = ObservationToken()
+        self.token = token
+        withPerceptionTracking {
+            apply()
+        } onChange: {
+            guard !token.isCancelled else {
+                return
+            }
+            RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
+                token.cancel()
+                self?.onChange(apply: apply)
+            }
+        }
+        
+    }
+    
+    func observe(_ apply: @escaping () -> Void) {
+        token?.cancel()
+        onChange(apply: apply)
+    }
+    
 }
