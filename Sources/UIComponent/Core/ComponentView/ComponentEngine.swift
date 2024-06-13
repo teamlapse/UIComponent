@@ -182,16 +182,20 @@ public class ComponentEngine {
                 onFirstReload()
             }
         }
-        if skipNextLayout {
-            skipNextLayout = false
-            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            render(updateViews: true)
-        } else if asyncLayout {
-            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-        } else {
-            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        observe { [weak self] in
+            guard let self else {
+                return
+            }
+            if skipNextLayout {
+                skipNextLayout = false
+                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                render(updateViews: true)
+            } else if asyncLayout {
+                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            } else {
+                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            }
         }
-        
     }
 
     private var asyncLayoutID: UUID?
@@ -213,17 +217,15 @@ public class ComponentEngine {
     }
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
-        guard let componentView = view, let component else { return }
-        
-        
-        observe { [weak self] in
-            guard let self else { return }
+        guard let componentView = view, let component else {
+            return
+        }
+            
             let adjustedSize = self.adjustedSize
             let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
                 component.layout(Constraint(maxSize:adjustedSize))
             }
             didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
-        }
     }
 
     private func didFinishLayout(renderNode: any RenderNode, contentOffsetAdjustFn: (() -> CGPoint)?) {
@@ -392,6 +394,7 @@ public class ComponentEngine {
 extension ComponentEngine {
     
     final class ObservationToken {
+        
         private var _isCancelled = false
         fileprivate var isCancelled: Bool { _isCancelled }
         
@@ -407,18 +410,18 @@ extension ComponentEngine {
     func onChange(apply: @escaping () -> Void) {
         let token = ObservationToken()
         self.token = token
-        withPerceptionTracking {
-            apply()
-        } onChange: {
-            guard !token.isCancelled else {
-                return
-            }
-            RunLoop.main.perform(inModes: [.common, .tracking]) { [weak self] in
+        RunLoop.main.perform(inModes: [.common, .tracking]) {
+            withPerceptionTracking {
+                apply()
+            } onChange: {
+                guard !token.isCancelled else {
+                    return
+                }
                 token.cancel()
-                self?.onChange(apply: apply)
+                self.onChange(apply: apply)
+                
             }
         }
-        
     }
     
     func observe(_ apply: @escaping () -> Void) {
