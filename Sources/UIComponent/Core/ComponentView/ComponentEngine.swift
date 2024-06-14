@@ -98,7 +98,7 @@ public class ComponentEngine {
         }
     }
 
-    fileprivate var token: ObservationToken?
+    fileprivate var tokens: Set<ObservationToken> = []
     
     /// A Boolean value that determines if the content view should be centered vertically.
     public var centerContentViewVertically = false
@@ -172,19 +172,20 @@ public class ComponentEngine {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
-        guard !isReloading, allowReload else { return }
-        isReloading = true
-        defer {
-            reloadCount += 1
-            needsReload = false
-            isReloading = false
-            if let onFirstReload, reloadCount == 1 {
-                onFirstReload()
-            }
-        }
+        
         observe { [weak self] in
             guard let self else {
                 return
+            }
+            guard !isReloading, allowReload else { return }
+            isReloading = true
+            defer {
+                reloadCount += 1
+                needsReload = false
+                isReloading = false
+                if let onFirstReload, reloadCount == 1 {
+                    onFirstReload()
+                }
             }
             if skipNextLayout {
                 skipNextLayout = false
@@ -393,7 +394,9 @@ public class ComponentEngine {
 
 extension ComponentEngine {
     
-    final class ObservationToken {
+    final class ObservationToken: Hashable {
+        
+        let id = UUID().uuidString
         
         private var _isCancelled = false
         fileprivate var isCancelled: Bool { _isCancelled }
@@ -405,27 +408,41 @@ extension ComponentEngine {
         deinit {
             self.cancel()
         }
+        
+        // MARK: - Hashable Conformance
+        
+        static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
+            return lhs.id == rhs.id
+        }
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+        }
     }
     
     func onChange(apply: @escaping () -> Void) {
+        tokens.forEach({ $0.cancel() })
+        tokens.removeAll()
+        
         let token = ObservationToken()
-        self.token = token
-        RunLoop.main.perform(inModes: [.common, .tracking]) {
-            withPerceptionTracking {
-                apply()
-            } onChange: {
+        self.tokens.insert(token)
+        
+        withPerceptionTracking(apply) { [weak self] in
+            guard !token.isCancelled, let self else {
+                return
+            }
+            RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
                 guard !token.isCancelled else {
                     return
                 }
                 token.cancel()
                 self.onChange(apply: apply)
-                
             }
+            
         }
     }
     
     func observe(_ apply: @escaping () -> Void) {
-        token?.cancel()
         onChange(apply: apply)
     }
     
