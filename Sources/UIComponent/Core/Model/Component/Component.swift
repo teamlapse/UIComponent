@@ -16,5 +16,6 @@ public protocol Component<R>: Sendable {
     ///
     /// - Parameter constraint: The constraints within which the component must lay itself out.
     /// - Returns: A `RenderNode` representing the laid out component.
+    @MainActor
     func layout(_ constraint: Constraint) -> R
 }

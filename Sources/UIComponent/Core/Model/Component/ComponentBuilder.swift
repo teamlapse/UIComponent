@@ -10,6 +10,7 @@ import Foundation
 public protocol ComponentBuilder: Component {
     associatedtype ResultComponent: Component
     /// Builds and returns the `ResultComponent`.
+    @MainActor
     func build() -> ResultComponent
 }
 
