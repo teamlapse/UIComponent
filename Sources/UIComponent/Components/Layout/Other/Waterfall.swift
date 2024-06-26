@@ -8,6 +8,7 @@ import UIKit
 ///   - columns: The number of columns in the layout.
 ///   - spacing: The spacing between items in the layout.
 ///   - children: The components that will be laid out according to the waterfall layout.
+@MainActor
 public protocol WaterfallLayoutProtocol: BaseLayoutProtocol {
     var columns: Int { get }
     var spacing: CGFloat { get }

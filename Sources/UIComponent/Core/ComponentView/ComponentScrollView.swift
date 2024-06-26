@@ -14,7 +14,7 @@ import UIKit
 open class ComponentScrollView: UIScrollView, ComponentDisplayableView {
     lazy public var engine: ComponentEngine = ComponentEngine(view: self)
 
-    public var onFirstReload: ((ComponentScrollView) -> Void)? {
+    public var onFirstReload: (@MainActor @Sendable (ComponentScrollView) -> Void)? {
         didSet {
             if let onFirstReload {
                 engine.onFirstReload = { [weak self] in

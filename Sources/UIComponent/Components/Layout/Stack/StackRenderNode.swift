@@ -4,6 +4,7 @@
 import UIKit
 
 /// A base render node protocol for a stack that provide implementation for ``visibleChildren(in:)``
+@MainActor
 public protocol StackRenderNode: RenderNode, BaseLayoutProtocol {
     /// The size of the render node.
     var size: CGSize { get }

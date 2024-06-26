@@ -4,7 +4,8 @@ import UIKit
 
 /// Render nodes are responsible for storing the layout information, generating UIView for rendering, and updating UIView upon reload.
 @dynamicMemberLookup
-public protocol RenderNode<View> {
+@MainActor
+public protocol RenderNode<View>: Sendable {
     /// The `UIView` class that this render node represents.
     associatedtype View: UIView
 

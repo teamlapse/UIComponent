@@ -3,12 +3,14 @@
 import UIComponent
 import UIKit
 
+@MainActor
 protocol GalleryTemplate {
     typealias Point = (main: CGFloat, cross: CGFloat)
     typealias Size = Point
     func calculateFrames(spacing: CGFloat, side: CGFloat, makeFrame: (Point, Size) -> CGRect) -> [CGRect]
 }
 
+@MainActor
 protocol GalleryLayout: BaseLayoutProtocol {
     var spacing: CGFloat { get }
     var children: [any Component] { get }

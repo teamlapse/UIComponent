@@ -5,6 +5,7 @@ import UIKit
 
 /// A protocol that defines the layout properties for flex layout.
 /// Used by ``FlexRow`` (``Flow``) & ``FlexColumn``
+@MainActor
 public protocol FlexLayout: BaseLayoutProtocol {
     /// The space between lines in the flex layout.
     var lineSpacing: CGFloat { get }

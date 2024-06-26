@@ -3,7 +3,7 @@
 import UIComponent
 
 struct AddCardButton: ComponentBuilder {
-    let onTap: () -> Void
+    let onTap: @MainActor @Sendable () -> Void
     func build() -> some Component {
         HStack(spacing: 10, justifyContent: .center, alignItems: .center) {
             Image(systemName: "plus").tintColor(.label)

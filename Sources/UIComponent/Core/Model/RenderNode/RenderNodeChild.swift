@@ -4,6 +4,7 @@ import UIKit
 
 /// A `RenderNodeChild` represents a child node of another RenderNode
 /// It holds the child render node, its position within the parent, and its index within the parent.
+@MainActor
 public struct RenderNodeChild {
     /// The child render node
     public let renderNode: any RenderNode

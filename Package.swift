@@ -24,6 +24,9 @@ let package = Package(
             name: "UIComponent",
             dependencies: [
                 .product(name: "Perception", package: "swift-perception")
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
         .testTarget(

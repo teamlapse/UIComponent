@@ -41,13 +41,13 @@ public struct DynamicVisibleFrameInset<Content: Component>: Component {
     public let content: Content
 
     /// A closure that provides dynamic insets based on the given frame, used to adjust the visible frame of the content.
-    public let insetProvider: (CGRect) -> UIEdgeInsets
+    public let insetProvider: @MainActor @Sendable (CGRect) -> UIEdgeInsets
 
     /// Initializes a new `DynamicVisibleFrameInset` with the given content and inset provider.
     /// - Parameters:
     ///   - content: The content render node to which the dynamic insets will be applied.
     ///   - insetProvider: A closure that provides a `UIEdgeInsets` value based on the given `CGRect`.
-    public init(content: Content, insetProvider: @escaping (CGRect) -> UIEdgeInsets) {
+    public init(content: Content, insetProvider: @escaping @MainActor @Sendable (CGRect) -> UIEdgeInsets) {
         self.content = content
         self.insetProvider = insetProvider
     }

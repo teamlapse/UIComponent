@@ -5,6 +5,7 @@ import UIKit
 /// `WrapperAnimator` is a subclass of `Animator` that allows for additional
 /// animation handling by providing custom blocks for insert, update, and delete operations.
 /// It can also pass through these update operation to another animator if needed.
+@MainActor
 public struct WrapperAnimator: Animator {
     /// The underlying animator that can be used to perform animations along side the custom animation blocks.
     public var content: Animator?
@@ -15,7 +16,7 @@ public struct WrapperAnimator: Animator {
     /// A block that is executed when a view needs to be updated. If `nil`, the update operation is passed to the underlying `content` animator.
     public var updateBlock: ((ComponentDisplayableView, UIView, CGRect) -> Void)?
     /// A block that is executed when a view is deleted. If `nil`, the delete operation is passed to the underlying `content` animator.
-    public var deleteBlock: ((ComponentDisplayableView, UIView, @escaping () -> Void) -> Void)?
+    public var deleteBlock: ((ComponentDisplayableView, UIView, @escaping @MainActor @Sendable () -> Void) -> Void)?
 
     public func shift(componentView: ComponentDisplayableView, delta: CGPoint, view: UIView) {
         (content ?? componentView.animator).shift(componentView: componentView, delta: delta, view: view)
@@ -40,7 +41,7 @@ public struct WrapperAnimator: Animator {
         }
     }
 
-    public func delete(componentView: ComponentDisplayableView, view: UIView, completion: @escaping () -> Void) {
+    public func delete(componentView: ComponentDisplayableView, view: UIView, completion: @escaping @MainActor @Sendable () -> Void) {
         if let deleteBlock {
             deleteBlock(componentView, view, completion)
         } else {

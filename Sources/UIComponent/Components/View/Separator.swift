@@ -38,6 +38,7 @@ public struct Separator: ComponentBuilder {
     }
 }
 
+@MainActor
 private func screenScale() -> CGFloat {
     #if os(visionOS)
     return 2.0

@@ -3,6 +3,7 @@
 import UIKit
 
 /// A protocol representing a stack layout and provide the stack layout implementation.
+@MainActor
 public protocol Stack: BaseLayoutProtocol {
     /// The space between adjacent children in the stack.
     var spacing: CGFloat { get }

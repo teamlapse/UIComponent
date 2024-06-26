@@ -6,7 +6,8 @@ import Foundation
 /// The only method that it require is ``Component/layout(_:)`` which calculates
 /// the layout of the component and generate a ``RenderNode``
 @dynamicMemberLookup
-public protocol Component<R> {
+@MainActor
+public protocol Component<R>: Sendable {
     /// The type of `RenderNode` that this component produces.
     associatedtype R: RenderNode
 

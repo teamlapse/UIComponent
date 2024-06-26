@@ -5,6 +5,7 @@ import UIKit
 import Perception
 
 /// Protocol defining a delegate responsible for determining if a component view should be reloaded.
+@MainActor
 public protocol ComponentReloadDelegate: AnyObject {
     /// Asks the delegate if the component view should be reloaded.
     /// - Parameter view: The `ComponentDisplayableView` that is asking for permission to reload.
@@ -15,6 +16,7 @@ public protocol ComponentReloadDelegate: AnyObject {
 /// `ComponentEngine` is the main class that powers the rendering of components.
 /// It manages a `ComponentDisplayableView` and handles rendering the component to the view.
 /// See `ComponentView` for a sample implementation.
+@MainActor
 public class ComponentEngine {
     /// A static property to disable animations during view updates.
     public static var disableUpdateAnimation: Bool = false
@@ -86,7 +88,7 @@ public class ComponentEngine {
     var contentOffsetDelta: CGPoint = .zero
 
     /// A closure that is called after the first reload.
-    var onFirstReload: (() -> Void)?
+    var onFirstReload: (@MainActor @Sendable () -> Void)?
 
     /// A view used to support zooming. Setting a `contentView` will render all views inside the content view.
     var contentView: UIView? {
@@ -201,20 +203,21 @@ public class ComponentEngine {
 
     private var asyncLayoutID: UUID?
     private func layoutComponentAsync(contentOffsetAdjustFn: (() -> CGPoint)?) {
-        guard let componentView = view, let component else { return }
-
-        let adjustedSize = adjustedSize
-        let asyncLayoutID = UUID()
-        self.asyncLayoutID = asyncLayoutID
-        Self.asyncLayoutQueue.async { [weak self] in
-            let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
-                component.layout(Constraint(maxSize: adjustedSize))
-            }
-            DispatchQueue.main.async {
-                guard let self, self.asyncLayoutID == asyncLayoutID else { return }
-                self.didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
-            }
-        }
+        assertionFailure("Async Layout unsupported")
+//        guard let componentView = view, let component else { return }
+//
+//        let adjustedSize = adjustedSize
+//        let asyncLayoutID = UUID()
+//        self.asyncLayoutID = asyncLayoutID
+//        Self.asyncLayoutQueue.async { [weak self] in
+//            let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
+//                component.layout(Constraint(maxSize: adjustedSize))
+//            }
+//            DispatchQueue.main.async {
+//                guard let self, self.asyncLayoutID == asyncLayoutID else { return }
+//                self.didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
+//            }
+//        }
     }
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
@@ -394,7 +397,7 @@ public class ComponentEngine {
 
 extension ComponentEngine {
     
-    final class ObservationToken: Hashable {
+    final class ObservationToken: Hashable, @unchecked Sendable {
         
         let id = UUID().uuidString
         
@@ -420,7 +423,7 @@ extension ComponentEngine {
         }
     }
     
-    func onChange(apply: @escaping () -> Void) {
+    func onChange(apply: @escaping @MainActor @Sendable () -> Void) {
         tokens.forEach({ $0.cancel() })
         tokens.removeAll()
         
@@ -436,13 +439,15 @@ extension ComponentEngine {
                     return
                 }
                 token.cancel()
-                self.onChange(apply: apply)
+                MainActor.assumeIsolated {
+                    self.onChange(apply: apply)
+                }
             }
             
         }
     }
     
-    func observe(_ apply: @escaping () -> Void) {
+    func observe(_ apply: @escaping @MainActor @Sendable () -> Void) {
         onChange(apply: apply)
     }
     

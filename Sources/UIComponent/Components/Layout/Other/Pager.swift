@@ -3,6 +3,7 @@ import UIKit
 
 /// A protocol that defines the properties and behaviors of a pager component.
 /// A pager is responsible for laying out a series of components in a swipeable full screen pager format.
+@MainActor
 public protocol Pager: BaseLayoutProtocol {
     /// Defines how child components are aligned along the cross axis.
     var alignItems: CrossAxisAlignment { get }

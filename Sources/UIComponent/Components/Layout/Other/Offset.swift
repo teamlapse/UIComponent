@@ -25,9 +25,9 @@ public struct Offset: Component {
 
 public struct DynamicOffset: Component {
     let content: any Component
-    let offsetProvider: (Constraint) -> CGPoint
+    let offsetProvider: @MainActor @Sendable (Constraint) -> CGPoint
 
-    public init(content: any Component, offsetProvider: @escaping (Constraint) -> CGPoint) {
+    public init(content: any Component, offsetProvider: @escaping @MainActor @Sendable (Constraint) -> CGPoint) {
         self.content = content
         self.offsetProvider = offsetProvider
     }

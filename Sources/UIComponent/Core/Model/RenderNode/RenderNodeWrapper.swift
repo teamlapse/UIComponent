@@ -9,8 +9,9 @@ import Foundation
 
 /// A protocol that wraps a content `RenderNode` to and pass through all the render node methods.
 /// Its render node methods can be overriden by the conforming type.
+@MainActor
 public protocol RenderNodeWrapper<Content>: RenderNode {
-    associatedtype Content: RenderNode
+    associatedtype Content: RenderNode & Sendable
     var content: Content { get }
 }
 

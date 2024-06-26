@@ -162,7 +162,7 @@ public struct ConstraintOverrideComponent<Content: Component>: Component {
 
 /// A render node wrapper that overrides the size of its content.
 /// It contains the original content render node and the size that should be applied to it.
-public struct SizeOverrideRenderNode<Content: RenderNode>: RenderNodeWrapper {
+public struct SizeOverrideRenderNode<Content: RenderNode & Sendable>: RenderNodeWrapper {
     public let content: Content
     public let size: CGSize
 
@@ -176,7 +176,8 @@ public struct SizeOverrideRenderNode<Content: RenderNode>: RenderNodeWrapper {
     }
 }
 
-public class LazyRenderNode<Content: Component>: RenderNodeWrapper {
+@MainActor
+public class LazyRenderNode<Content: Component & Sendable>: RenderNodeWrapper {
     public let component: Content
     private var _content: Content.R?
     public var content: Content.R {

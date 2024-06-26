@@ -28,7 +28,7 @@ extension Component {
     /// ```
     /// - Parameter keyPath: A key path to a specific writable property on the underlying view.
     /// - Returns: A closure that takes a new value for the property and returns a `KeyPathUpdateComponent` representing the component with the updated value.
-    public subscript<Value>(dynamicMember keyPath: ReferenceWritableKeyPath<R.View, Value>) -> (Value) -> KeyPathUpdateComponent<Self, Value> {
+    public subscript<Value: Sendable>(dynamicMember keyPath: ReferenceWritableKeyPath<R.View, Value>) -> (Value) -> KeyPathUpdateComponent<Self, Value> {
         { value in
             with(keyPath, value)
         }
@@ -41,7 +41,7 @@ extension Component {
     ///   - keyPath: A key path to a specific property on the underlying view.
     ///   - value: The value to set for the property specified by keyPath.
     /// - Returns: A `KeyPathUpdateComponent` that represents the modified component.
-    public func with<Value>(_ keyPath: ReferenceWritableKeyPath<R.View, Value>, _ value: Value) -> KeyPathUpdateComponent<Self, Value> {
+    public func with<Value: Sendable>(_ keyPath: ReferenceWritableKeyPath<R.View, Value>, _ value: Value) -> KeyPathUpdateComponent<Self, Value> {
         ModifierComponent(content: self) {
             $0.with(keyPath, value)
         }
@@ -81,7 +81,7 @@ extension Component {
     /// Registers a closure to be called when the component is updated.
     /// - Parameter update: A closure that takes the component's underlying view as its parameter.
     /// - Returns: An `UpdateComponent` that represents the modified component with an update closure.
-    public func update(_ update: @escaping (R.View) -> Void) -> UpdateComponent<Self> {
+    public func update(_ update: @escaping @MainActor @Sendable (R.View) -> Void) -> UpdateComponent<Self> {
         ModifierComponent(content: self) {
             $0.update(update)
         }
@@ -453,7 +453,7 @@ extension Component {
     /// Applies a dynamic offset to the component based on constraints at layout time.
     /// - Parameter offsetProvider: A closure that provides a `CGPoint` based on the given `Constraint`.
     /// - Returns: A component that dynamically adjusts its offset based on the provided point.
-    public func offset(_ offsetProvider: @escaping (Constraint) -> CGPoint) -> some Component {
+    public func offset(_ offsetProvider: @escaping @MainActor @Sendable (Constraint) -> CGPoint) -> some Component {
         DynamicOffset(content: self, offsetProvider: offsetProvider)
     }
 
@@ -508,21 +508,21 @@ extension Component {
     /// Applies dynamic visible frame insets to the component based on constraints at layout time.
     /// - Parameter insetProvider: A closure that provides `UIEdgeInsets` based on the given `CGRect`.
     /// - Returns: A component that dynamically adjusts its visible frame insets based on the provided insets.
-    public func visibleInset(_ insetProvider: @escaping (CGRect) -> UIEdgeInsets) -> DynamicVisibleFrameInset<Self> {
+    public func visibleInset(_ insetProvider: @escaping @MainActor @Sendable (CGRect) -> UIEdgeInsets) -> DynamicVisibleFrameInset<Self> {
         DynamicVisibleFrameInset(content: self, insetProvider: insetProvider)
     }
 
     /// Provides a reader for the render node of the component.
     /// - Parameter reader: A closure that receives the render node.
     /// - Returns: A `RenderNodeReader` component that allows reading the render node.
-    public func renderNodeReader(_ reader: @escaping (Self.R) -> Void) -> RenderNodeReader<Self> {
+    public func renderNodeReader(_ reader: @escaping @MainActor @Sendable (Self.R) -> Void) -> RenderNodeReader<Self> {
         RenderNodeReader(content: self, reader)
     }
 
     /// Adds a callback to be invoked when the visible bounds of the component change.
     /// - Parameter callback: A closure that is called with the new size and visible rectangle.
     /// - Returns: A `VisibleBoundsObserverComponent` that invokes the callback when the visible bounds change.
-    public func onVisibleBoundsChanged(_ callback: @escaping (CGSize, CGRect) -> Void) -> VisibleBoundsObserverComponent<Self> {
+    public func onVisibleBoundsChanged(_ callback: @escaping @MainActor @Sendable (CGSize, CGRect) -> Void) -> VisibleBoundsObserverComponent<Self> {
         VisibleBoundsObserverComponent(content: self, onVisibleBoundsChanged: callback)
     }
 
@@ -547,7 +547,7 @@ extension Component {
     @available(*, deprecated, message: "Use .tappableView(_:).tappableViewConfig(_:) instead")
     public func tappableView(
         configuration: TappableViewConfig,
-        _ onTap: @escaping (TappableView) -> Void
+        _ onTap: @escaping @MainActor @Sendable (TappableView) -> Void
     ) -> EnvironmentComponent<TappableViewConfig, TappableViewComponent> {
         TappableViewComponent(
             component: self,
@@ -562,7 +562,7 @@ extension Component {
     @available(*, deprecated, message: "Use .tappableView(_:).tappableViewConfig(_:) instead")
     public func tappableView(
         configuration: TappableViewConfig,
-        _ onTap: @escaping () -> Void
+        _ onTap: @escaping @MainActor @Sendable () -> Void
     ) -> EnvironmentComponent<TappableViewConfig, TappableViewComponent> {
         tappableView(configuration: configuration) { _ in
             onTap()
@@ -573,7 +573,7 @@ extension Component {
     /// - Parameters:
     ///   - onTap: The closure to be called when the tappable view is tapped.
     public func tappableView(
-        _ onTap: @escaping (TappableView) -> Void
+        _ onTap: @escaping @MainActor @Sendable (TappableView) -> Void
     ) -> TappableViewComponent {
         TappableViewComponent(
             component: self,
@@ -585,7 +585,7 @@ extension Component {
     /// - Parameters:
     ///   - onTap: The closure to be called when the tappable view is tapped.
     public func tappableView(
-        _ onTap: @escaping () -> Void
+        _ onTap: @escaping @MainActor @Sendable () -> Void
     ) -> TappableViewComponent {
         tappableView { _ in
             onTap()
@@ -675,7 +675,7 @@ extension Component {
     ///   - passthrough: A Boolean value that determines whether the animator update method will be called for the content component.
     ///   - updateBlock: A closure that is called to perform the layout update animation.
     /// - Returns: An `AnimatorWrapperComponent` containing the modified component.
-    public func animateUpdate(passthrough: Bool = false, _ updateBlock: @escaping ((ComponentDisplayableView, UIView, CGRect) -> Void)) -> AnimatorWrapperComponent<Self> {
+    public func animateUpdate(passthrough: Bool = false, _ updateBlock: @escaping (@MainActor @Sendable (ComponentDisplayableView, UIView, CGRect) -> Void)) -> AnimatorWrapperComponent<Self> {
         ModifierComponent(content: self) {
             $0.animateUpdate(passthrough: passthrough, updateBlock)
         }
@@ -684,7 +684,7 @@ extension Component {
     /// Animates the insertion of the component.
     /// - Parameter insertBlock: A closure that is called to perform the insertion animation.
     /// - Returns: An `AnimatorWrapperComponent` containing the modified component.
-    public func animateInsert(_ insertBlock: @escaping ((ComponentDisplayableView, UIView, CGRect) -> Void)) -> AnimatorWrapperComponent<Self> {
+    public func animateInsert(_ insertBlock: @escaping (@MainActor @Sendable (ComponentDisplayableView, UIView, CGRect) -> Void)) -> AnimatorWrapperComponent<Self> {
         ModifierComponent(content: self) {
             $0.animateInsert(insertBlock)
         }
@@ -693,7 +693,7 @@ extension Component {
     /// Animates the deletion of the component.
     /// - Parameter deleteBlock: A closure that is called to perform the deletion animation.
     /// - Returns: An `AnimatorWrapperComponent` containing the modified component.
-    public func animateDelete(_ deleteBlock: @escaping (ComponentDisplayableView, UIView, @escaping () -> Void) -> Void) -> AnimatorWrapperComponent<Self> {
+    public func animateDelete(_ deleteBlock: @escaping @MainActor @Sendable (ComponentDisplayableView, UIView, @escaping () -> Void) -> Void) -> AnimatorWrapperComponent<Self> {
         ModifierComponent(content: self) {
             $0.animateDelete(deleteBlock)
         }

@@ -20,7 +20,7 @@ public enum TextContent {
 /// It also supports the new swift `AttributedString` from iOS 15 for more complex styling.
 public struct Text: Component {
     /// Environment-injected font used when rendering plain strings.
-    @Environment(\.font) var font
+     @Environment(\.font) var font
     /// The content of the text, which can be a plain string or an attributed string.
     public let content: TextContent
     /// The maximum number of lines to display the text. 0 means no limit.

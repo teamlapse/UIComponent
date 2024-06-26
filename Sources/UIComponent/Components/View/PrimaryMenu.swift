@@ -11,7 +11,8 @@ import UIKit
 /// `PrimaryMenuConfig` defines the configuration for a `PrimaryMenu`.
 /// It provides customization options such as highlight state changes and tap actions.
 @available(iOS 14.0, *)
-public struct PrimaryMenuConfig {
+@MainActor
+public struct PrimaryMenuConfig: @unchecked Sendable {
     /// The default configuration for all PrimaryMenu instances.
     public static var `default`: PrimaryMenuConfig = PrimaryMenuConfig(onHighlightChanged: nil, didTap: nil)
 
@@ -37,6 +38,7 @@ public typealias PrimaryMenuConfiguration = PrimaryMenuConfig
 
 /// A UIControl subclass that displays a context menu when tapped.
 @available(iOS 14.0, *)
+@MainActor
 public class PrimaryMenu: UIControl {
     /// Indicates whether any `PrimaryMenu` is currently showing a menu.
     public static fileprivate(set) var isShowingMenu = false

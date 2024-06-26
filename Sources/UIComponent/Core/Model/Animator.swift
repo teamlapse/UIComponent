@@ -6,7 +6,8 @@ import UIKit
 /// Animator is a base class that provides default implementations for animations
 /// related to the insertion, deletion, and updating of views within a `ComponentDisplayableView`.
 /// Subclasses can override these methods to provide custom animation behavior.
-public protocol Animator {
+@MainActor
+public protocol Animator: Sendable {
 
     /// Called before ComponentView perform any update to the cells.
     /// This method is only called when your animator is the componentView's root animator (i.e. componentView.animator)
@@ -40,7 +41,7 @@ public protocol Animator {
     func delete(
         componentView: ComponentDisplayableView,
         view: UIView,
-        completion: @escaping () -> Void
+        completion: @escaping @MainActor @Sendable () -> Void
     )
 
     /// Called when:
@@ -79,7 +80,7 @@ public extension Animator {
     func delete(
         componentView: ComponentDisplayableView,
         view: UIView,
-        completion: @escaping () -> Void
+        completion: @escaping @MainActor @Sendable () -> Void
     ) {
         completion()
     }

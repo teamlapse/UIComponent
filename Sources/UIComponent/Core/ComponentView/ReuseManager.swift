@@ -22,6 +22,7 @@ public protocol ReuseableView: UIView {
 /// `ReuseManager` is a class that manages the reuse of `UIView` objects to improve performance.
 /// It stores reusable views in a dictionary and provides methods to enqueue and dequeue these views.
 /// It also handles the cleanup of views that are no longer needed.
+@MainActor
 open class ReuseManager: NSObject {
     /// Shared instance of `ReuseManager`.
     public static let shared = ReuseManager()
@@ -41,6 +42,7 @@ open class ReuseManager: NSObject {
     /// - Parameters:
     ///   - identifier: A string that uniquely identifies the type of the view.
     ///   - view: The `UIView` to be enqueued.
+    @MainActor
     public func enqueue<T: UIView>(identifier: String = NSStringFromClass(T.self), view: T) {
         view.ckContext.reuseIdentifier = nil
         view.ckContext.reuseManager = nil
@@ -72,6 +74,7 @@ open class ReuseManager: NSObject {
     ///   - identifier: A string that uniquely identifies the type of the view.
     ///   - defaultView: A closure that creates a new instance of the view if no reusable view is available.
     /// - Returns: A `UIView` that is either dequeued from the reusable views or created anew.
+    @MainActor
     public func dequeue<T: UIView>(
         identifier: String = NSStringFromClass(T.self),
         _ defaultView: @autoclosure () -> T
@@ -93,6 +96,7 @@ open class ReuseManager: NSObject {
     ///   - identifier: A string that uniquely identifies the type of the view.
     ///   - type: The type of the view to be dequeued or created.
     /// - Returns: A `UIView` that is either dequeued from the reusable views or created anew.
+    @MainActor
     public func dequeue<T: UIView>(
         identifier: String = NSStringFromClass(T.self),
         type: T.Type
@@ -101,7 +105,7 @@ open class ReuseManager: NSObject {
     }
 
     /// Cleans up all reusable views by removing them from their superview and clearing the `reusableViews` dictionary.
-    @objc func cleanup() {
+    @objc @MainActor func cleanup() {
         for views in reusableViews.values {
             for view in views {
                 view.removeFromSuperview()

@@ -76,7 +76,7 @@ import Foundation
 /// ```swift
 /// ProfileComponent().currentUser(user)
 /// ```
-@propertyWrapper public struct Environment<Value> {
+@propertyWrapper @MainActor public struct Environment<Value: Sendable> {
     /// The key used to access the environment value.
     let key: EnvironmentValuesKey<Value>
 

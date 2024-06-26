@@ -15,14 +15,14 @@ public struct DynamicHPager: Component {
     /// Defines how child components are aligned along the cross axis.
     public let alignItems: CrossAxisAlignment
     /// The content provider that returns a component for a given page index.
-    public let content: (Int) -> any Component
+    public let content: @MainActor @Sendable (Int) -> any Component
 
     /// Initializes a new `DynamicHPager` with the specified number of pages and content provider.
     /// - Parameters:
     ///   - count: The total number of pages.
     ///   - alignItems: Defines how child components are aligned along the cross axis.
     ///   - content: A closure that provides the content for a given page index.
-    public init(count: Int, alignItems: CrossAxisAlignment = .start, content: @escaping (Int) -> any Component) {
+    public init(count: Int, alignItems: CrossAxisAlignment = .start, content: @escaping @MainActor @Sendable (Int) -> any Component) {
         self.count = count
         self.alignItems = alignItems
         self.content = content
@@ -45,14 +45,14 @@ public struct DynamicVPager: Component {
     /// Defines how child components are aligned along the cross axis.
     public let alignItems: CrossAxisAlignment
     /// The content provider that returns a component for a given page index.
-    public let content: (Int) -> any Component
+    public let content: @MainActor @Sendable (Int) -> any Component
 
     /// Initializes a new `DynamicVPager` with the specified number of pages and content provider.
     /// - Parameters:
     ///   - count: The total number of pages.
     ///   - alignItems: Defines how child components are aligned along the cross axis.
     ///   - content: A closure that provides the content for a given page index.
-    public init(count: Int, alignItems: CrossAxisAlignment = .start, content: @escaping (Int) -> any Component) {
+    public init(count: Int, alignItems: CrossAxisAlignment = .start, content: @escaping @MainActor @Sendable (Int) -> any Component) {
         self.count = count
         self.alignItems = alignItems
         self.content = content

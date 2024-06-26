@@ -11,6 +11,7 @@ import Foundation
 /// It provides a type-safe interface to access values keyed by custom types conforming to `EnvironmentKey`.
 ///
 /// Checkout ``Environment`` for more information.
+@MainActor
 public struct EnvironmentValues {
     /// A dictionary to hold environment values with their associated key type's `ObjectIdentifier`.
     private var values: [ObjectIdentifier: Any] = [:]

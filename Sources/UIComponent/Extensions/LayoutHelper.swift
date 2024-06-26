@@ -3,17 +3,18 @@
 import UIKit
 
 /// An enumeration to define the main axis alignment of a layout.
-public enum MainAxisAlignment: CaseIterable {
+public enum MainAxisAlignment: CaseIterable, Sendable {
     case start, end, center, spaceBetween, spaceAround, spaceEvenly
 }
 
 /// An enumeration to define the cross axis alignment of a layout.
-public enum CrossAxisAlignment: CaseIterable {
+public enum CrossAxisAlignment: CaseIterable, Sendable {
     case start, end, center, stretch
 }
 
 /// Protocol defining the base layout behavior.
 /// It should be used with either the `VerticalLayoutProtocol` or `HorizontalLayoutProtocol` to provide a concrete implementation of the methods.
+@MainActor
 public protocol BaseLayoutProtocol {
     associatedtype R: RenderNode
     /// Retrieves the main axis value from a `CGPoint`.
@@ -33,9 +34,11 @@ public protocol BaseLayoutProtocol {
 }
 
 /// Protocol for layouts that align children vertically.
+@MainActor
 public protocol VerticalLayoutProtocol: BaseLayoutProtocol {}
 
 /// Protocol for layouts that align children horizontally.
+@MainActor
 public protocol HorizontalLayoutProtocol: BaseLayoutProtocol {}
 
 extension VerticalLayoutProtocol {

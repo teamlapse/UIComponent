@@ -9,6 +9,7 @@ import UIKit
 
 /// A component that renders a ``PrimaryMenu``
 @available(iOS 14.0, *)
+@MainActor
 public struct PrimaryMenuComponent: Component {
     /// The configuration for the primary menu view, obtained from the environment.
     @Environment(\.primaryMenuConfig)

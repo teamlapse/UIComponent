@@ -5,7 +5,7 @@ import UIKit
 
 private struct Card: ComponentBuilder {
     let card: CardData
-    let onTap: () -> Void
+    let onTap: @MainActor @Sendable () -> Void
     func build() -> some Component {
         VStack(spacing: 8) {
             Text(card.title).font(UIFont.boldSystemFont(ofSize: 22))

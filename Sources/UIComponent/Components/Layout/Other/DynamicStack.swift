@@ -19,7 +19,7 @@ public struct DynamicHStack: Component {
     /// Defines how child components are aligned along the cross axis.
     public let alignItems: CrossAxisAlignment
     /// The content provider that returns a component for a given cell index.
-    public let content: (Int) -> any Component
+    public let content: @MainActor @Sendable (Int) -> any Component
 
     /// Initializes a new `DynamicHStack` with the specified number of cells and content provider.
     /// - Parameters:
@@ -27,7 +27,7 @@ public struct DynamicHStack: Component {
     ///   - cellWidth: The width of each cell.
     ///   - spacing: The spacing between each cell. Default: 0.
     ///   - content: A closure that provides the content for a given cell index.
-    public init(count: Int, cellWidth: CGFloat, spacing: CGFloat = 0, alignItems: CrossAxisAlignment = .start, content: @escaping (Int) -> any Component) {
+    public init(count: Int, cellWidth: CGFloat, spacing: CGFloat = 0, alignItems: CrossAxisAlignment = .start, content: @escaping @MainActor @Sendable (Int) -> any Component) {
         self.count = count
         self.cellWidth = cellWidth
         self.spacing = spacing
@@ -56,7 +56,7 @@ public struct DynamicVStack: Component {
     /// Defines how child components are aligned along the cross axis.
     public let alignItems: CrossAxisAlignment
     /// The content provider that returns a component for a given cell index.
-    public let content: (Int) -> any Component
+    public let content: @MainActor @Sendable (Int) -> any Component
 
     /// Initializes a new `DynamicVStack` with the specified number of cells and content provider.
     /// - Parameters:
@@ -64,7 +64,7 @@ public struct DynamicVStack: Component {
     ///   - cellHeight: The height of each cell.
     ///   - spacing: The spacing between each cell. Default: 0.
     ///   - content: A closure that provides the content for a given cell index.
-    public init(count: Int, cellHeight: CGFloat, spacing: CGFloat = 0, alignItems: CrossAxisAlignment = .start, content: @escaping (Int) -> any Component) {
+    public init(count: Int, cellHeight: CGFloat, spacing: CGFloat = 0, alignItems: CrossAxisAlignment = .start, content: @escaping @MainActor @Sendable (Int) -> any Component) {
         self.count = count
         self.cellHeight = cellHeight
         self.spacing = spacing
@@ -88,7 +88,7 @@ public struct DynamicVStackRenderNode: DynamicStackRenderNode, VerticalLayoutPro
     public let constraintSize: CGSize
     public let spacing: CGFloat
     public let alignItems: CrossAxisAlignment
-    public let content: (Int) -> any Component
+    public let content: @MainActor @Sendable (Int) -> any Component
 }
 
 public struct DynamicHStackRenderNode: DynamicStackRenderNode, HorizontalLayoutProtocol {
@@ -98,17 +98,18 @@ public struct DynamicHStackRenderNode: DynamicStackRenderNode, HorizontalLayoutP
     public let constraintSize: CGSize
     public let spacing: CGFloat
     public let alignItems: CrossAxisAlignment
-    public let content: (Int) -> any Component
+    public let content: @MainActor @Sendable (Int) -> any Component
 }
 
 /// A protocol that defines the properties and behaviors of a dynamic stack component.
+@MainActor
 public protocol DynamicStackRenderNode: RenderNode, BaseLayoutProtocol {
     /// Defines how child components are aligned along the cross axis.
     var alignItems: CrossAxisAlignment { get }
     var count: Int { get }
     var constraintSize: CGSize { get }
     var spacing: CGFloat { get }
-    var content: (Int) -> any Component { get }
+    var content: @MainActor @Sendable (Int) -> any Component { get }
     var size: CGSize { get }
     func visibleChildren(in frame: CGRect) -> [RenderNodeChild]
 }

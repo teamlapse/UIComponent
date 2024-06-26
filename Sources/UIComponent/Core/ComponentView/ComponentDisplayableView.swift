@@ -3,6 +3,7 @@
 import UIKit
 
 /// A protocol that defines a view capable of displaying components.
+@MainActor
 public protocol ComponentDisplayableView: UIView {
     var engine: ComponentEngine { get }
 }

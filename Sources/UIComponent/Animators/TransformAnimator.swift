@@ -7,6 +7,7 @@ public typealias AnimatedReloadAnimator = TransformAnimator
 
 /// A simple Animator implementation that applies a transform and fade
 /// animation during deletion and insertion.
+@MainActor
 public struct TransformAnimator: Animator {
     /// The 3D transform applied to the view during animation.
     public var transform: CATransform3D

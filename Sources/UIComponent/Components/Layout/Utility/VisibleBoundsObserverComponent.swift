@@ -10,13 +10,13 @@ public struct VisibleBoundsObserverComponent<Content: Component>: Component {
     /// - Parameters:
     ///   - size: The new size of the content component
     ///   - rect: The new rectangle of the visible bounds in the component coordinate space.
-    public let onVisibleBoundsChanged: (CGSize, CGRect) -> ()
+    public let onVisibleBoundsChanged: @MainActor @Sendable (CGSize, CGRect) -> ()
 
     /// Initializes a new `VisibleBoundsObserverComponent` with the given content and a closure to call when the visible bounds change.
     /// - Parameters:
     ///   - content: The content component to observe.
     ///   - onVisibleBoundsChanged: A closure that is called with the new size and visible rectangle when the visible bounds change.
-    public init(content: Content, onVisibleBoundsChanged: @escaping (CGSize, CGRect) -> Void) {
+    public init(content: Content, onVisibleBoundsChanged: @escaping @MainActor @Sendable (CGSize, CGRect) -> Void) {
         self.content = content
         self.onVisibleBoundsChanged = onVisibleBoundsChanged
     }
@@ -27,20 +27,20 @@ public struct VisibleBoundsObserverComponent<Content: Component>: Component {
 }
 
 /// A render node that wraps another render node and observes the visible bounds of its content.
-public struct VisibleBoundsObserverRenderNode<Content: RenderNode>: RenderNodeWrapper {
+public struct VisibleBoundsObserverRenderNode<Content: RenderNode & Sendable>: RenderNodeWrapper {
     /// The child component that it will observe.
     public let content: Content
     /// The closure that gets called when the visible bounds of the content component changes.
     /// - Parameters:
     ///   - size: The size of the content render node.
     ///   - rect: The new visible bounds.
-    public let onVisibleBoundsChanged: (CGSize, CGRect) -> ()
+    public let onVisibleBoundsChanged: @MainActor @Sendable (CGSize, CGRect) -> ()
 
     /// Initializes a new instance of `VisibleBoundsObserverRenderNode`.
     /// - Parameters:
     ///   - content: The content render node to observe.
     ///   - onVisibleBoundsChanged: A closure that is called with the new size and visible rectangle when the visible bounds change.
-    public init(content: Content, onVisibleBoundsChanged: @escaping (CGSize, CGRect) -> Void) {
+    public init(content: Content, onVisibleBoundsChanged: @escaping @MainActor @Sendable (CGSize, CGRect) -> Void) {
         self.content = content
         self.onVisibleBoundsChanged = onVisibleBoundsChanged
     }
