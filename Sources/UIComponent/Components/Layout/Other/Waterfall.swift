@@ -100,7 +100,7 @@ extension Waterfall {
     ///   - columns: The number of columns in the layout. Defaults to 2.
     ///   - spacing: The spacing between items in the layout. Defaults to 0.
     ///   - content: A result builder closure that returns an array of components to be laid out in the waterfall layout.
-    public init(columns: Int = 2, spacing: CGFloat = 0, @ComponentArrayBuilder _ content: () -> [any Component]) {
+    public init(columns: Int = 2, spacing: CGFloat = 0, @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]) {
         self.init(columns: columns, spacing: spacing, children: content())
     }
 }
@@ -112,7 +112,7 @@ extension HorizontalWaterfall {
     ///   - columns: The number of rows in the layout. Defaults to 2.
     ///   - spacing: The spacing between items in the layout. Defaults to 0.
     ///   - content: A result builder closure that returns an array of components to be laid out in the horizontal waterfall layout.
-    public init(columns: Int = 2, spacing: CGFloat = 0, @ComponentArrayBuilder _ content: () -> [any Component]) {
+    public init(columns: Int = 2, spacing: CGFloat = 0, @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]) {
         self.init(columns: columns, spacing: spacing, children: content())
     }
 }

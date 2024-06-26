@@ -72,7 +72,7 @@ extension ZStack {
     public init(
         verticalAlignment: CrossAxisAlignment = .center,
         horizontalAlignment: CrossAxisAlignment = .center,
-        @ComponentArrayBuilder _ content: () -> [any Component]
+        @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]
     ) {
         self.init(verticalAlignment: verticalAlignment, horizontalAlignment: horizontalAlignment, children: content())
     }

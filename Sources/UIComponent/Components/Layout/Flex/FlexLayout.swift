@@ -53,7 +53,7 @@ extension FlexLayout {
         justifyContent: MainAxisAlignment = .start,
         alignItems: CrossAxisAlignment = .start,
         alignContent: MainAxisAlignment = .start,
-        @ComponentArrayBuilder _ content: () -> [any Component]
+        @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]
     ) {
         self.init(
             lineSpacing: lineSpacing,
@@ -94,7 +94,7 @@ extension FlexLayout {
         justifyContent: MainAxisAlignment = .start,
         alignItems: CrossAxisAlignment = .start,
         alignContent: MainAxisAlignment = .start,
-        @ComponentArrayBuilder _ content: () -> [any Component]
+        @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]
     ) {
         self.init(spacing: spacing, justifyContent: justifyContent, alignItems: alignItems, alignContent: alignContent, children: content())
     }

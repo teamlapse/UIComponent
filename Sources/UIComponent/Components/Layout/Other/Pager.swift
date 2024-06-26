@@ -72,7 +72,7 @@ extension HPager {
     /// - Parameters:
     ///   - alignItems: The alignment of children along the cross axis. Defaults to `.start`.
     ///   - content: A result builder closure that returns an array of components to be laid out in the pager.
-    public init(alignItems: CrossAxisAlignment = .start, @ComponentArrayBuilder _ content: () -> [any Component]) {
+    public init(alignItems: CrossAxisAlignment = .start, @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]) {
         self.init(alignItems: alignItems, children: content())
     }
 }
@@ -99,7 +99,7 @@ extension VPager {
     /// - Parameters:
     ///   - alignItems: The alignment of children along the cross axis. Defaults to `.start`.
     ///   - content: A result builder closure that returns an array of components to be laid out in the pager.
-    public init(alignItems: CrossAxisAlignment = .start, @ComponentArrayBuilder _ content: () -> [any Component]) {
+    public init(alignItems: CrossAxisAlignment = .start, @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]) {
         self.init(alignItems: alignItems, children: content())
     }
 }

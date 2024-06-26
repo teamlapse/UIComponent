@@ -39,7 +39,7 @@ extension VStack {
     ///   - justifyContent: The alignment of children along the main axis.
     ///   - alignItems: The alignment of children along the cross axis.
     ///   - content: A result builder closure that returns the child components to be laid out.
-    public init(spacing: CGFloat = 0, justifyContent: MainAxisAlignment = .start, alignItems: CrossAxisAlignment = .start, @ComponentArrayBuilder _ content: () -> [any Component]) {
+    public init(spacing: CGFloat = 0, justifyContent: MainAxisAlignment = .start, alignItems: CrossAxisAlignment = .start, @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]) {
         self.init(
             spacing: spacing,
             justifyContent: justifyContent,

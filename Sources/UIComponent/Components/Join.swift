@@ -43,7 +43,7 @@ public struct Join: ComponentArrayContainer {
     /// - Parameters:
     ///   - content: A closure that returns an array of components to be joined.
     ///   - separator: A closure that returns an array of components to be used as separators.
-    public init(@ComponentArrayBuilder _ content: () -> [any Component], @ComponentArrayBuilder separator: () -> [any Component]) {
+    public init(@ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component], @ComponentArrayBuilder separator: @MainActor @Sendable () -> [any Component]) {
         var result: [any Component] = []
         let components = content()
         if !components.isEmpty {
