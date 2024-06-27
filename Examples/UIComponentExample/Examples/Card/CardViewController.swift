@@ -14,7 +14,7 @@ private class CardView: UIView {
         label.font = UIFont.systemFont(ofSize: 16)
         return label
     }()
-    var onTap: (() -> Void)?
+    var onTap: (@MainActor @Sendable () -> Void)?
     var data: CardData? {
         didSet {
             titleLabel.text = data?.title
@@ -56,7 +56,7 @@ private struct CardComponent: Component {
 
 private struct CardRenderNode: RenderNode {
     let data: CardData
-    let onTap: () -> Void
+    let onTap: @MainActor @Sendable () -> Void
     var id: String? {
         data.id
     }

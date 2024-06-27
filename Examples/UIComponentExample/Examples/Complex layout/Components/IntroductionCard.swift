@@ -22,7 +22,7 @@ struct IntroductionCard: ComponentBuilder {
         """
 
     let isExpanded: Bool
-    let tapHandler: () -> Void
+    let tapHandler: @MainActor @Sendable () -> Void
 
     func build() -> some Component {
         HStack(spacing: 15, alignItems: .stretch) {

@@ -19,7 +19,7 @@ protocol GalleryLayout: BaseLayoutProtocol {
 }
 
 extension GalleryLayout {
-    init(spacing: CGFloat = 0, template: [GalleryTemplate], @ComponentArrayBuilder _ content: () -> [any Component]) {
+    init(spacing: CGFloat = 0, template: [GalleryTemplate], @ComponentArrayBuilder _ content: @MainActor @Sendable () -> [any Component]) {
         self.init(spacing: spacing, template: template, children: content())
     }
 }

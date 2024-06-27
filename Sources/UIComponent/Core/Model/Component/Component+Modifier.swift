@@ -241,7 +241,7 @@ extension Component {
     /// Wraps the component with a background component, using a closure that returns the background component.
     /// - Parameter component: A closure that returns the component to be used as the background.
     /// - Returns: A `Background` component that layers the background behind the current component.
-    public func background(_ component: () -> any Component) -> Background {
+    public func background(_ component: @MainActor @Sendable () -> any Component) -> Background {
         Background(content: self, background: component())
     }
 
@@ -257,7 +257,7 @@ extension Component {
     /// Wraps the component with an overlay component, using a closure that returns the overlay component.
     /// - Parameter component: A closure that returns the component to be used as the overlay.
     /// - Returns: An `Overlay` component that layers the overlay on top of the current component.
-    public func overlay(_ component: () -> any Component) -> Overlay {
+    public func overlay(_ component: @MainActor @Sendable () -> any Component) -> Overlay {
         Overlay(content: self, overlay: component())
     }
 
@@ -296,7 +296,7 @@ extension Component {
         verticalAlignment: Badge.Alignment = .start,
         horizontalAlignment: Badge.Alignment = .end,
         offset: CGPoint = .zero,
-        _ component: () -> any Component
+        _ component: @MainActor @Sendable () -> any Component
     ) -> Badge {
         Badge(
             content: self,
@@ -637,7 +637,7 @@ public extension Component {
     ///   - keyPath: A key path to a specific environment value.
     ///   - valueBuilder: A closure to be called to generate the value to set for the environment key.
     /// - Returns: An `EnvironmentComponent` that provides the environment value to the component.
-    func environment<Value>(_ keyPath: WritableKeyPath<EnvironmentValues, Value>, valueBuilder: () -> Value) -> EnvironmentComponent<Value, Self> {
+    func environment<Value>(_ keyPath: WritableKeyPath<EnvironmentValues, Value>, valueBuilder: @MainActor @Sendable () -> Value) -> EnvironmentComponent<Value, Self> {
         EnvironmentComponent(keyPath: keyPath, value: valueBuilder(), content: self)
     }
 
@@ -646,7 +646,7 @@ public extension Component {
     ///   - keyType: The type of the environment key.
     ///   - valueBuilder: A closure to be called to generate the value to set for the environment key.
     /// - Returns: An `EnvironmentComponent` that provides the environment value to the component.
-    func environment<Value>(_ keyType: any EnvironmentKey<Value>.Type, valueBuilder: () -> Value) -> EnvironmentComponent<Value, Self> {
+    func environment<Value>(_ keyType: any EnvironmentKey<Value>.Type, valueBuilder: @MainActor @Sendable () -> Value) -> EnvironmentComponent<Value, Self> {
         EnvironmentComponent(keyType: keyType, value: valueBuilder(), content: self)
     }
 }

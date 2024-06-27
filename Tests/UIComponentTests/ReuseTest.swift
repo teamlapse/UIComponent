@@ -5,6 +5,7 @@ import XCTest
 @testable import UIComponent
 import UIKit
 
+@MainActor
 final class ReuseTests: XCTestCase {
     var componentView: ComponentView!
     override func setUp() {

@@ -9,6 +9,7 @@ let text2 = "This is a test of layout"
 let font = UIFont.systemFont(ofSize: 16)
 let maxSize = CGSize(width: 100, height: CGFloat.infinity)
 
+@MainActor
 final class UIComponentTests: XCTestCase {
     func testPerfHStackText() {
         let componentView = ComponentView()
@@ -138,7 +139,8 @@ final class UIComponentTests: XCTestCase {
         print("Layout 10000 text with dynamic sized used \(rawLayoutTime)s.")
         XCTAssertLessThan(fixedSizeLayoutTime * 2, rawLayoutTime)
     }
-    func measureTime(_ component: () -> any Component) -> TimeInterval {
+    @MainActor
+    func measureTime(_ component: @MainActor @Sendable () -> any Component) -> TimeInterval {
         let componentView = ComponentView()
         let startTime = CACurrentMediaTime()
         componentView.component = component()
