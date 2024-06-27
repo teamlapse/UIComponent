@@ -20,7 +20,7 @@ public typealias AnimatorWrapperComponent<Content: Component> = ModifierComponen
 /// A component produced by the ``Component/reuseStrategy(_:)`` modifier
 public typealias ReuseStrategyComponent<Content: Component> = ModifierComponent<Content, ReuseStrategyRenderNode<Content.R>>
 
-extension Component {
+extension Component where Self: Sendable {
     /// Provides a closure that acts as a modifier that can be used to modify a view property. This is used to support @dynamicMemberLookup, it should not be used directly.
     /// Example:
     /// ```swift
@@ -28,7 +28,7 @@ extension Component {
     /// ```
     /// - Parameter keyPath: A key path to a specific writable property on the underlying view.
     /// - Returns: A closure that takes a new value for the property and returns a `KeyPathUpdateComponent` representing the component with the updated value.
-    public subscript<Value: Sendable>(dynamicMember keyPath: ReferenceWritableKeyPath<R.View, Value>) -> (Value) -> KeyPathUpdateComponent<Self, Value> {
+    public subscript<Value: Sendable>(dynamicMember keyPath: ReferenceWritableKeyPath<R.View, Value>) -> @MainActor @Sendable (Value) -> KeyPathUpdateComponent<Self, Value> {
         { value in
             with(keyPath, value)
         }
