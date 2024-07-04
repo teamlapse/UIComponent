@@ -308,7 +308,8 @@ public class ComponentEngine {
                     animator.shift(componentView: componentView, delta: contentOffsetDelta, view: view)
                 }
             } else {
-                view = renderable.renderNode._makeView()
+                let componentId = String(Int(bitPattern: ObjectIdentifier(self)))
+                view = renderable.renderNode._makeView(engineId: componentId)
                 UIView.performWithoutAnimation {
                     view.bounds.size = frame.bounds.size
                     view.center = frame.center

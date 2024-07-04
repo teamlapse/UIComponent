@@ -132,14 +132,14 @@ extension RenderNode {
 // MARK: - Internal methods
 
 extension RenderNode {
-    internal func _makeView() -> UIView {
+    internal func _makeView(engineId: String) -> UIView {
         switch reuseStrategy {
         case .automatic:
-            return ReuseManager.shared.dequeue(identifier: defaultReuseKey, makeView())
+            return ReuseManager.shared.dequeue(identifier: engineId + defaultReuseKey, makeView())
         case .noReuse:
             return makeView()
         case .key(let key):
-            return ReuseManager.shared.dequeue(identifier: key, makeView())
+            return ReuseManager.shared.dequeue(identifier: engineId + key, makeView())
         }
     }
 
