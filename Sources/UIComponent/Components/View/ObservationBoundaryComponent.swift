@@ -3,6 +3,8 @@
 import UIKit
 import IssueReporting
 
+/// Protects the ancestor or sibling views from reloading when model properties change that are accessed in this subheirarchy
+/// This can isolate heavy model updates to a single component without reloading an entire screen
 public struct ObservationBoundaryComponent<C: ComponentBuilder>: ComponentBuilder {
     let componentBuilder: C
 
@@ -29,6 +31,8 @@ public struct ObservationBoundaryComponent<C: ComponentBuilder>: ComponentBuilde
     }
 }
 
+/// Protects the ancestor or sibling views from reloading when model properties change that are accessed in this subheirarchy
+/// /// This can isolate heavy model updates to a single component without reloading an entire screen
 public struct ObservationScrollBoundaryComponent<C: ComponentBuilder>: ComponentBuilder {
     let componentBuilder: C
 

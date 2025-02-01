@@ -24,6 +24,10 @@ extension UIView {
             return componentEngine
         }
     }
+
+    public var isComponentHost: Bool {
+        _componentEngine != nil
+    }
 }
 
 private struct AssociatedKeys {
