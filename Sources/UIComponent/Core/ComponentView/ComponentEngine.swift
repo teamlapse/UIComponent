@@ -1,5 +1,6 @@
 //  Created by Luke Zhao on 8/27/20.
 
+import Observation
 import IssueReporting
 import UIKit
 
@@ -218,35 +219,41 @@ public final class ComponentEngine: @unchecked Sendable {
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
         guard let view, let component else { return }
-        let token = ObservationToken()
-        _latestObservationToken = token
-        let renderNode = withObservationTracking {
-            EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
-                component.layout(Constraint(maxSize: adjustedSize))
-            }
-        } onChange: { [weak self, token] in
-            guard token.isCancelled == false, let self else {
-                return
-            }
+        if #available(iOS 17, *) {
+            let token = ObservationToken()
+            _latestObservationToken = token
+            let renderNode = withObservationTracking {
+                EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
+                    component.layout(Constraint(maxSize: adjustedSize))
+                }
+            } onChange: { [weak self, token] in
+                guard token.isCancelled == false, let self else {
+                    return
+                }
 
-            guard token === _latestObservationToken else {
-                return
-            }
+                guard token === _latestObservationToken else {
+                    return
+                }
 
-            token.cancel()
+                token.cancel()
 
-            trackReload()
+                trackReload()
 
-            MainActor.assertIsolated("MUST only update models on the main thread")
-            MainActor.assumeIsolated {
-                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-                    self.observationReloadCount += 1
-                    self.layoutComponent(contentOffsetAdjustFn: nil)
+                MainActor.assertIsolated("MUST only update models on the main thread")
+                MainActor.assumeIsolated {
+                    RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+                        self.observationReloadCount += 1
+                        self.layoutComponent(contentOffsetAdjustFn: nil)
+                    }
                 }
             }
+            didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
+        } else {
+            let renderNode = EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
+                component.layout(Constraint(maxSize: adjustedSize))
+            }
+            didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
         }
-
-        didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
     }
 
     private func didFinishLayout(renderNode: any RenderNode, contentOffsetAdjustFn: (() -> CGPoint)?) {

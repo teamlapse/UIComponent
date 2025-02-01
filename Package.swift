@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "UIComponent",
     platforms: [
-        .iOS("17.0"),
+        .iOS("13.0"),
     ],
     products: [
         .library(
@@ -22,7 +22,7 @@ let package = Package(
         .target(
             name: "UIComponent",
             dependencies: [
-                .product(name: "IssueReporting", package: "swift-issue-reporting")
+                .product(name: "IssueReporting", package: "swift-issue-reporting"),
             ]
         ),
         .testTarget(

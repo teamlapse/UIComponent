@@ -5,6 +5,8 @@ import IssueReportingTestSupport
 @testable import UIComponent
 import UIKit
 
+
+@available(iOS 17.0, *)
 @Observable
 class TestModel {
     var value: String
@@ -14,6 +16,7 @@ class TestModel {
     }
 }
 
+@available(iOS 17.0, *)
 struct TestView: ComponentBuilder {
     let model: TestModel
 
@@ -22,6 +25,7 @@ struct TestView: ComponentBuilder {
     }
 }
 
+@available(iOS 17.0, *)
 struct DeepViewParent: ComponentBuilder {
     let model: TestModel
 
@@ -43,6 +47,7 @@ struct DeepViewParent: ComponentBuilder {
     }
 }
 
+@available(iOS 17.0, *)
 struct DeepViewParentInfiniteHeight: ComponentBuilder {
     let model: TestModel
 
@@ -63,6 +68,7 @@ struct DeepViewParentInfiniteHeight: ComponentBuilder {
     }
 }
 
+@available(iOS 17.0, *)
 struct DeepViewParentInfiniteWidth: ComponentBuilder {
     let model: TestModel
 
@@ -86,6 +92,7 @@ struct DeepViewParentInfiniteWidth: ComponentBuilder {
 @Suite("Observation")
 @MainActor
 struct ObservationTests {
+    @available(iOS 17.0, *)
     @Test func testBasicObservation() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -103,6 +110,7 @@ struct ObservationTests {
         #expect((view.subviews.first as? UILabel)?.text == "updated")
     }
 
+    @available(iOS 17.0, *)
     @Test func testMultipleUpdatesInOneRunloopIteration() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -122,6 +130,7 @@ struct ObservationTests {
         #expect((view.subviews.first as? UILabel)?.text == "updated 2")
     }
 
+    @available(iOS 17.0, *)
     @Test func testMultipleObservations() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -147,6 +156,7 @@ struct ObservationTests {
         #expect(view.componentEngine.observationReloadCount == 3)
     }
 
+    @available(iOS 17.0, *)
     @Test func testExcessiveReloads() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -176,6 +186,7 @@ struct ObservationTests {
         }
     }
 
+    @available(iOS 17.0, *)
     @Test func testResetObservationCount() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -195,6 +206,7 @@ struct ObservationTests {
         #expect(view.componentEngine.observationReloadCount == 0)
     }
 
+    @available(iOS 17.0, *)
     @Test func testObservationBoundary() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -225,6 +237,7 @@ struct ObservationTests {
         #expect((reloadableLabelContainer.subviews.first as? UILabel)?.text == "updated")
     }
 
+    @available(iOS 17.0, *)
     @Test func testObservationBoundaryInfiniteHeight() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
@@ -238,6 +251,7 @@ struct ObservationTests {
         }
     }
 
+    @available(iOS 17.0, *)
     @Test func testObservationBoundaryInfiniteWidth() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
