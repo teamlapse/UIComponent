@@ -433,7 +433,13 @@ public final class ComponentEngine: @unchecked Sendable {
         public static let `default` = ReloadThreshold(count: 5, timeWindow: 1.0)
 
         public static func reloads(count: Int = 5, timeWindow: TimeInterval = 1) -> ReloadThreshold {
-            ReloadThreshold(count: count, timeWindow: timeWindow)
+            if count >= 10 {
+                withIssueReporters([.runtimeWarning]) {
+                    reportIssue("Abnormally high reload threshold chosen, find the earliest opportunity to optimise")
+                }
+            }
+
+            return ReloadThreshold(count: count, timeWindow: timeWindow)
         }
     }
 

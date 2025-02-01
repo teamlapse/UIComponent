@@ -207,6 +207,17 @@ struct ObservationTests {
     }
 
     @available(iOS 17.0, *)
+    @Test func testHighObservationReloadCount() throws {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
+
+        withKnownIssue {
+            view.componentEngine.debugReloadThreshold = .reloads(count: 10, timeWindow: 0.1)
+        } matching: { issue in
+            issue.description == "Issue recorded: Abnormally high reload threshold chosen, find the earliest opportunity to optimise"
+        }
+    }
+
+    @available(iOS 17.0, *)
     @Test func testObservationBoundary() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
