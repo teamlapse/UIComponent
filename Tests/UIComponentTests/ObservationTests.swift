@@ -42,6 +42,25 @@ struct ObservationTests {
         #expect((view.subviews.first as? UILabel)?.text == "updated")
     }
 
+    @Test func testMultipleUpdatesInOneRunloopIteration() throws {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
+        let model = TestModel(value: "initial")
+
+        view.componentEngine.component = TestView(model: model)
+        view.componentEngine.reloadData()
+
+        #expect(view.componentEngine.observationReloadCount == 0)
+        #expect((view.subviews.first as? UILabel)?.text == "initial")
+
+        model.value = "updated"
+        model.value = "updated 2"
+
+        RunLoop.syncMain()
+
+        #expect(view.componentEngine.observationReloadCount == 1)
+        #expect((view.subviews.first as? UILabel)?.text == "updated 2")
+    }
+
     @Test func testMultipleObservations() throws {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
         let model = TestModel(value: "initial")
