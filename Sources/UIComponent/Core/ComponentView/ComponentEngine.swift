@@ -444,6 +444,7 @@ public final class ComponentEngine: @unchecked Sendable {
     }
 
     public var debugReloadsDisabled: Bool = false
+    public var debugReloadsUseBreakpoint: Bool = false
     public var debugReloadThreshold: ReloadThreshold = .default
 
     private var debugReloadTimestamps: [Date] = []
@@ -468,7 +469,7 @@ public final class ComponentEngine: @unchecked Sendable {
                 Excessive updates: \(debugReloadTimestamps.count) reloads/\(debugReloadThreshold.timeWindow)s
                 Optimise observable model updates in heirarchy for \(componentDesc)
                 """
-            withIssueReporters(IssueReporters.current + [.breakpoint]) {
+            withIssueReporters([.runtimeWarning, debugReloadsUseBreakpoint ? .breakpoint : nil].compactMap { $0 }) {
                 reportIssue(message)
             }
         }
