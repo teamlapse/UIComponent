@@ -3,6 +3,7 @@
 #if DEBUG
     import IssueReporting
 #endif
+import Perception
 import UIKit
 
 /// Protocol defining a delegate responsible for determining if a component engine should be reloaded.
