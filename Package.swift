@@ -15,7 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.1"),
-        .package(url: "https://github.com/pointfreeco/swift-perception.git", exact: "1.4.2"),
+        .package(url: "https://github.com/pointfreeco/swift-perception.git", exact: "1.1.3"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
