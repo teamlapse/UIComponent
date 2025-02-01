@@ -25,5 +25,33 @@ public struct ObservationBoundaryComponent<C: ComponentBuilder>: ComponentBuilde
                 return c
             }
 #endif
+            .eraseToAnyComponentOfView()
+    }
+}
+
+public struct ObservationScrollBoundaryComponent<C: ComponentBuilder>: ComponentBuilder {
+    let componentBuilder: C
+
+    public init(component: C) {
+        self.componentBuilder = component
+    }
+
+
+    public func build() -> AnyComponentOfView<UIScrollView> {
+        ViewComponent<UIScrollView>()
+            .with(\.componentEngine.component, componentBuilder)
+#if DEBUG
+            .constraint { c in
+                if c.maxSize.height == .infinity {
+                    reportIssue("You must provide a height for \(String(describing: componentBuilder)) in a ObservationScrollBoundaryComponent's")
+                }
+
+                if c.maxSize.width == .infinity {
+                    reportIssue("You must provide a width for \(String(describing: componentBuilder)) in a ObservationScrollBoundaryComponent's")
+                }
+                return c
+            }
+#endif
+            .eraseToAnyComponentOfView()
     }
 }
