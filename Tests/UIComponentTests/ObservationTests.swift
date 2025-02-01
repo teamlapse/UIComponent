@@ -2,7 +2,6 @@
 
 import Perception
 import Testing
-import IssueReportingTestSupport
 @testable import UIComponent
 import UIKit
 

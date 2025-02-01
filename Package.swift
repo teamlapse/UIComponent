@@ -29,7 +29,9 @@ let package = Package(
         ),
         .testTarget(
             name: "UIComponentTests",
-            dependencies: ["UIComponent", .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay")]
+            dependencies: [
+                "UIComponent"
+            ]
         ),
     ]
 )
