@@ -14,7 +14,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "1.5.1")
+        .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -22,12 +22,12 @@ let package = Package(
         .target(
             name: "UIComponent",
             dependencies: [
-                .product(name: "IssueReporting", package: "swift-issue-reporting"),
+                .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
             ]
         ),
         .testTarget(
             name: "UIComponentTests",
-            dependencies: ["UIComponent", .product(name: "IssueReportingTestSupport", package: "swift-issue-reporting")]
+            dependencies: ["UIComponent", .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay")]
         ),
     ]
 )
