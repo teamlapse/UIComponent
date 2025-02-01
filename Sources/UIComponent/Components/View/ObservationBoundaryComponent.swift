@@ -17,11 +17,11 @@ public struct ObservationBoundaryComponent<C: ComponentBuilder>: ComponentBuilde
             .with(\.componentEngine.component, componentBuilder)
 #if DEBUG
             .constraint { c in
-                if c.maxSize.height == .infinity {
+                if c.maxSize.height == .infinity || (c.isTight && c.minSize.height == 0) {
                     reportIssue("You must provide a height for \(String(describing: componentBuilder)) in a ObservationBoundaryComponent's")
                 }
 
-                if c.maxSize.width == .infinity {
+                if c.maxSize.width == .infinity || (c.isTight && c.minSize.width == 0) {
                     reportIssue("You must provide a width for \(String(describing: componentBuilder)) in a ObservationBoundaryComponent's")
                 }
                 return c
@@ -46,11 +46,11 @@ public struct ObservationScrollBoundaryComponent<C: ComponentBuilder>: Component
             .with(\.componentEngine.component, componentBuilder)
 #if DEBUG
             .constraint { c in
-                if c.maxSize.height == .infinity {
+                if c.maxSize.height == .infinity || (c.isTight && c.minSize.height == 0) {
                     reportIssue("You must provide a height for \(String(describing: componentBuilder)) in a ObservationScrollBoundaryComponent's")
                 }
 
-                if c.maxSize.width == .infinity {
+                if c.maxSize.width == .infinity || (c.isTight && c.minSize.width == 0) {
                     reportIssue("You must provide a width for \(String(describing: componentBuilder)) in a ObservationScrollBoundaryComponent's")
                 }
                 return c
