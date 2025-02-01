@@ -433,7 +433,7 @@ public final class ComponentEngine: @unchecked Sendable {
         public static let `default` = ReloadThreshold(count: 5, timeWindow: 1.0)
 
         public static func reloads(count: Int = 5, timeWindow: TimeInterval = 1) -> ReloadThreshold {
-            if count >= 10 {
+            if count >= 100 {
                 withIssueReporters([.runtimeWarning]) {
                     reportIssue("Abnormally high reload threshold chosen, find the earliest opportunity to optimise")
                 }
@@ -443,6 +443,7 @@ public final class ComponentEngine: @unchecked Sendable {
         }
     }
 
+    public var debugReloadsDisabled: Bool = false
     public var debugReloadThreshold: ReloadThreshold = .default
 
     private var debugReloadTimestamps: [Date] = []
@@ -450,6 +451,7 @@ public final class ComponentEngine: @unchecked Sendable {
 
     private func trackReload() {
 #if DEBUG
+        guard !debugReloadsDisabled else { return }
         let now = Date()
         debugReloadTimestamps.append(now)
 
