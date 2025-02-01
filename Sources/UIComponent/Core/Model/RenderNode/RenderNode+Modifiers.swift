@@ -5,7 +5,7 @@ import UIKit
 /// A render node that store an update block to be applied to the view during reloads.
 public struct UpdateRenderNode<Content: RenderNode>: RenderNodeWrapper {
     public let content: Content
-    public let update: (Content.View) -> Void
+    public let update: @MainActor (Content.View) -> Void
 
     public var reuseStrategy: ReuseStrategy {
         // we don't know what the update block did, so we disable
@@ -19,7 +19,9 @@ public struct UpdateRenderNode<Content: RenderNode>: RenderNodeWrapper {
 
     public func updateView(_ view: Content.View) {
         content.updateView(view)
-        update(view)
+        MainActor.assumeIsolated {
+            update(view)
+        }
     }
 }
 
@@ -98,7 +100,7 @@ extension RenderNode {
     /// Creates a render node that applies a custom update to the view.
     /// - Parameter update: A closure that defines how the view should be updated.
     /// - Returns: An `UpdateRenderNode` that uses the custom update closure.
-    public func update(_ update: @escaping (View) -> Void) -> UpdateRenderNode<Self> {
+    public func update(_ update: @MainActor @escaping (View) -> Void) -> UpdateRenderNode<Self> {
         UpdateRenderNode(content: self, update: update)
     }
 }

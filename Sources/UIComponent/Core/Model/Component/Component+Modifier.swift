@@ -81,7 +81,7 @@ extension Component {
     /// Registers a closure to be called when the component is updated.
     /// - Parameter update: A closure that takes the component's underlying view as its parameter.
     /// - Returns: An `UpdateComponent` that represents the modified component with an update closure.
-    public func update(_ update: @escaping (R.View) -> Void) -> UpdateComponent<Self> {
+    public func update(_ update: @MainActor @escaping (R.View) -> Void) -> UpdateComponent<Self> {
         ModifierComponent(content: self) {
             $0.update(update)
         }
