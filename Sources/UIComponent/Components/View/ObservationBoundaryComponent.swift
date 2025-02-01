@@ -18,13 +18,15 @@ public struct ObservationBoundaryComponent<C: ComponentBuilder>: ComponentBuilde
         #if DEBUG
             .constraint { c in
                 let hasInvalidHeight = (c.maxSize.height == .infinity && c.minSize.height == 0) ||
-                    (c.maxSize.height > 0 && c.minSize.height == 0)
+                    (c.maxSize.height > 0 && c.minSize.height == 0) ||
+                    c.minSize.height == -.infinity
                 let hasInvalidWidth = (c.maxSize.width == .infinity && c.minSize.width == 0) ||
-                    (c.maxSize.width > 0 && c.minSize.width == 0)
+                    (c.maxSize.width > 0 && c.minSize.width == 0) ||
+                    c.minSize.width == -.infinity
 
                 if hasInvalidHeight, hasInvalidWidth {
                     withIssueReporters([.runtimeWarning, .breakpoint]) {
-                        reportIssue("View cannot layout - dimensions are not properly constrained (missing minimum size) for \(String(describing: componentBuilder)) in ObservationBoundaryComponent")
+                        reportIssue("View cannot layout - dimensions are not properly constrained (invalid or missing size constraints) for \(String(describing: componentBuilder)) in ObservationBoundaryComponent")
                     }
                 }
                 return c
@@ -49,13 +51,15 @@ public struct ObservationScrollBoundaryComponent<C: ComponentBuilder>: Component
         #if DEBUG
             .constraint { c in
                 let hasInvalidHeight = (c.maxSize.height == .infinity && c.minSize.height == 0) ||
-                    (c.maxSize.height > 0 && c.minSize.height == 0)
+                    (c.maxSize.height > 0 && c.minSize.height == 0) ||
+                    c.minSize.height == -.infinity
                 let hasInvalidWidth = (c.maxSize.width == .infinity && c.minSize.width == 0) ||
-                    (c.maxSize.width > 0 && c.minSize.width == 0)
+                    (c.maxSize.width > 0 && c.minSize.width == 0) ||
+                    c.minSize.width == -.infinity
 
                 if hasInvalidHeight, hasInvalidWidth {
                     withIssueReporters([.runtimeWarning, .breakpoint]) {
-                        reportIssue("View cannot layout - dimensions are not properly constrained (missing minimum size) for \(String(describing: componentBuilder)) in ObservationScrollBoundaryComponent")
+                        reportIssue("View cannot layout - dimensions are not properly constrained (invalid or missing size constraints) for \(String(describing: componentBuilder)) in ObservationScrollBoundaryComponent")
                     }
                 }
                 return c

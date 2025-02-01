@@ -245,7 +245,7 @@ struct ObservationTests {
         withKnownIssue {
             view.componentEngine.reloadData()
         } matching: { issue in
-            issue.description == "Issue recorded: You must provide a height for BottomLevel(model: UIComponentTests.TestModel) in a ObservationBoundaryComponent\'s"
+            issue.description == "Issue recorded: View cannot layout - dimensions are not properly constrained (invalid or missing size constraints) for BottomLevel(model: UIComponentTests.TestModel) in ObservationBoundaryComponent"
         }
     }
 
@@ -258,7 +258,7 @@ struct ObservationTests {
         withKnownIssue {
             view.componentEngine.reloadData()
         } matching: { issue in
-            issue.description == "Issue recorded: You must provide a width for BottomLevel(model: UIComponentTests.TestModel) in a ObservationBoundaryComponent\'s"
+            issue.description == "Issue recorded: View cannot layout - dimensions are not properly constrained (invalid or missing size constraints) for BottomLevel(model: UIComponentTests.TestModel) in ObservationBoundaryComponent"
         }
     }
 }
