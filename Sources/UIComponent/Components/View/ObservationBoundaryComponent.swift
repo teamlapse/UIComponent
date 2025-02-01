@@ -1,6 +1,9 @@
 //  Created by Alex Little on 01/02/2025.
 
-import IssueReporting
+#if DEBUG
+    import IssueReporting
+#endif
+
 import UIKit
 
 /// Protects the ancestor or sibling views from reloading when model properties change that are accessed in this subheirarchy

@@ -1,7 +1,8 @@
 //  Created by Luke Zhao on 8/27/20.
 
-import IssueReporting
-import Perception
+#if DEBUG
+    import IssueReporting
+#endif
 import UIKit
 
 /// Protocol defining a delegate responsible for determining if a component engine should be reloaded.

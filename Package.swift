@@ -11,7 +11,7 @@ let package = Package(
         .library(
             name: "UIComponent",
             targets: ["UIComponent"]
-        )
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.1"),
@@ -24,13 +24,13 @@ let package = Package(
             name: "UIComponent",
             dependencies: [
                 .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-                .product(name: "Perception", package: "swift-perception")
+                .product(name: "Perception", package: "swift-perception"),
             ]
         ),
         .testTarget(
             name: "UIComponentTests",
             dependencies: [
-                "UIComponent"
+                "UIComponent",
             ]
         ),
     ]
