@@ -328,7 +328,8 @@ public final class ComponentEngine: @unchecked Sendable {
                     animator.shift(hostingView: view, delta: contentOffsetDelta, view: cell)
                 }
             } else {
-                cell = renderable.renderNode._makeView()
+                let engineId = String(Int(bitPattern: ObjectIdentifier(self)))
+                cell = renderable.renderNode._makeView(engineId: engineId)
                 UIView.performWithoutAnimation {
                     cell.bounds.size = frame.bounds.size
                     cell.center = frame.center
