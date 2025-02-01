@@ -1,6 +1,6 @@
 //  Created by Luke Zhao on 8/27/20.
 
-import Observation
+import Perception
 import IssueReporting
 import UIKit
 
@@ -222,7 +222,7 @@ public final class ComponentEngine: @unchecked Sendable {
         if #available(iOS 17, *) {
             let token = ObservationToken()
             _latestObservationToken = token
-            let renderNode = withObservationTracking {
+            let renderNode = withPerceptionTracking {
                 EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
                     component.layout(Constraint(maxSize: adjustedSize))
                 }
