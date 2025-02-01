@@ -1,7 +1,7 @@
 //  Created by Luke Zhao on 8/27/20.
 
-import Perception
 import IssueReporting
+import Perception
 import UIKit
 
 /// Protocol defining a delegate responsible for determining if a component engine should be reloaded.
@@ -433,11 +433,13 @@ public final class ComponentEngine: @unchecked Sendable {
         public static let `default` = ReloadThreshold(count: 5, timeWindow: 1.0)
 
         public static func reloads(count: Int = 5, timeWindow: TimeInterval = 1) -> ReloadThreshold {
-            if count >= 100 {
-                withIssueReporters([.runtimeWarning]) {
-                    reportIssue("Abnormally high reload threshold chosen, find the earliest opportunity to optimise")
+            #if DEBUG
+                if count >= 100 {
+                    withIssueReporters([.runtimeWarning]) {
+                        reportIssue("Abnormally high reload threshold, find the earliest opportunity to optimise")
+                    }
                 }
-            }
+            #endif
 
             return ReloadThreshold(count: count, timeWindow: timeWindow)
         }
@@ -451,29 +453,29 @@ public final class ComponentEngine: @unchecked Sendable {
     private let debugReloadTracking = DispatchQueue(label: "com.component.reloadTracking")
 
     private func trackReload() {
-#if DEBUG
-        guard !debugReloadsDisabled else { return }
-        let now = Date()
-        debugReloadTimestamps.append(now)
+        #if DEBUG
+            guard !debugReloadsDisabled else { return }
+            let now = Date()
+            debugReloadTimestamps.append(now)
 
-        // Remove timestamps outside the time window
-        debugReloadTimestamps = debugReloadTimestamps.filter {
-            now.timeIntervalSince($0) <= self.debugReloadThreshold.timeWindow
-        }
+            // Remove timestamps outside the time window
+            debugReloadTimestamps = debugReloadTimestamps.filter {
+                now.timeIntervalSince($0) <= self.debugReloadThreshold.timeWindow
+            }
 
-        // Check if we've exceeded the threshold
-        if debugReloadTimestamps.count >= debugReloadThreshold.count {
-            let componentDesc = component.map { String(describing: $0) } ?? "unknown"
-            // We plus one on the count because we report the issue optimistically so we have an accurate stacktrace
-            let message = """
+            // Check if we've exceeded the threshold
+            if debugReloadTimestamps.count >= debugReloadThreshold.count {
+                let componentDesc = component.map { String(describing: $0) } ?? "unknown"
+                // We plus one on the count because we report the issue optimistically so we have an accurate stacktrace
+                let message = """
                 Excessive updates: \(debugReloadTimestamps.count) reloads/\(debugReloadThreshold.timeWindow)s
                 Optimise observable model updates in heirarchy for \(componentDesc)
                 """
-            withIssueReporters([.runtimeWarning, debugReloadsUseBreakpoint ? .breakpoint : nil].compactMap { $0 }) {
-                reportIssue(message)
+                withIssueReporters([.runtimeWarning, debugReloadsUseBreakpoint ? .breakpoint : nil].compactMap { $0 }) {
+                    reportIssue(message)
+                }
             }
-        }
-#endif
+        #endif
     }
 }
 
@@ -519,7 +521,7 @@ final class ObservationToken: Hashable, @unchecked Sendable {
     var isCancelled: Bool { _isCancelled }
 
     public func cancel() {
-        self._isCancelled = true
+        _isCancelled = true
     }
 
     deinit {
@@ -529,7 +531,7 @@ final class ObservationToken: Hashable, @unchecked Sendable {
     // MARK: - Hashable Conformance
 
     static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
 
     func hash(into hasher: inout Hasher) {
