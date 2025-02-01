@@ -37,8 +37,8 @@ public struct ObservationScrollBoundaryComponent<C: ComponentBuilder>: Component
     }
 
 
-    public func build() -> AnyComponentOfView<UIScrollView> {
-        ViewComponent<UIScrollView>()
+    public func build() -> AnyComponentOfView<ComponentScrollView> {
+        ViewComponent<ComponentScrollView>()
             .with(\.componentEngine.component, componentBuilder)
 #if DEBUG
             .constraint { c in
