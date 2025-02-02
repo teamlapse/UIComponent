@@ -6,13 +6,7 @@ class PerceptionViewController: ComponentViewController {
     let model = PerceptionModel()
 
     override var component: any Component {
-        print("RELOADING SCREEN")
-        return ObservableComponent(
-            component: PerceptionScreen(model: model),
-            width: .fill,
-            height: .fill
-        )
-        .viewController(self) /// Environment will be passed down as environment is captured first view before we wrap in ViewComponent
+        PerceptionScreen(model: model)
     }
 
     override func viewDidLoad() {

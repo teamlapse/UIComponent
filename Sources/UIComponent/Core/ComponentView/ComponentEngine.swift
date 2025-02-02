@@ -4,6 +4,8 @@
 import UIKit
 import Perception
 
+import OSLog
+
 #if DEBUG
 import IssueReporting
 #endif
@@ -257,6 +259,33 @@ public class ComponentEngine: NSObject {
     ///   - updateViews: A Boolean value that determines if the views should be updated.
     func render(updateViews: Bool) {
         guard let componentView = view, allowReload, !isRendering, let renderNode else { return }
+
+        let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
+        let componentName = component.flatMap { $0.typeName } ?? "Unknown"
+
+        if updateViews {
+            os_signpost(
+                .begin,
+                log: SignpostLog.componentLayout,
+                name: "ComponentEngine",
+                signpostID: signpostId,
+                "Render:%{public}@",
+                componentName
+            )
+        }
+
+        defer {
+            if updateViews {
+                os_signpost(
+                    .end,
+                    log: SignpostLog.componentLayout,
+                    name: "ComponentEngine",
+                    signpostID: signpostId,
+                    "Rendered"
+                )
+            }
+        }
+
         isRendering = true
 
         animator.willUpdate(componentView: componentView)
@@ -449,4 +478,8 @@ public class ComponentEngine: NSObject {
         }
 #endif
     }
+}
+
+enum SignpostLog {
+    static let componentLayout = OSLog(subsystem: "com.lapse.UIComponent", category: "UIComponent")
 }
