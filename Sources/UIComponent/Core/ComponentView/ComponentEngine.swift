@@ -180,24 +180,61 @@ public final class ComponentEngine: @unchecked Sendable {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     public func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
-        guard !isReloading, allowReload else { return }
-        isReloading = true
-        defer {
-            reloadCount += 1
-            needsReload = false
-            isReloading = false
-            if let onFirstReload, let view, reloadCount == 1 {
-                onFirstReload(view)
+        observe { [weak self] _ in
+            guard let self else { return }
+            guard !isReloading, allowReload else { return }
+            isReloading = true
+            defer {
+                reloadCount += 1
+                needsReload = false
+                isReloading = false
+                if let onFirstReload, let view, reloadCount == 1 {
+                    onFirstReload(view)
+                }
+            }
+
+            if renderOnly {
+                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                render(updateViews: true)
+            } else if asyncLayout {
+                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            } else {
+                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
             }
         }
 
-        if renderOnly {
-            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            render(updateViews: true)
-        } else if asyncLayout {
-            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-        } else {
-            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+    }
+
+    private func observe(iteration: Int = 0, _ changes: @escaping (Int) -> Void) {
+        _latestObservationToken?.cancel()
+
+        let token = ObservationToken()
+        _latestObservationToken = token
+
+        withPerceptionTracking {
+            changes(iteration)
+        } onChange: { [weak self] in
+            guard token.isCancelled == false, let self else {
+                return
+            }
+
+            guard token === _latestObservationToken else {
+                return
+            }
+
+            token.cancel()
+
+            trackReload()
+
+            MainActor.assertIsolated("MUST only update models on the main thread")
+            MainActor.assumeIsolated {
+                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+                    self.observationReloadCount += 1
+                    self.observe(iteration: iteration + 1) { iteration in
+                        changes(iteration)
+                    }
+                }
+            }
         }
     }
 
@@ -221,41 +258,10 @@ public final class ComponentEngine: @unchecked Sendable {
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
         guard let view, let component else { return }
-        if #available(iOS 17, *) {
-            let token = ObservationToken()
-            _latestObservationToken = token
-            let renderNode = withPerceptionTracking {
-                EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
-                    component.layout(Constraint(maxSize: adjustedSize))
-                }
-            } onChange: { [weak self, token] in
-                guard token.isCancelled == false, let self else {
-                    return
-                }
-
-                guard token === _latestObservationToken else {
-                    return
-                }
-
-                token.cancel()
-
-                trackReload()
-
-                MainActor.assertIsolated("MUST only update models on the main thread")
-                MainActor.assumeIsolated {
-                    RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-                        self.observationReloadCount += 1
-                        self.layoutComponent(contentOffsetAdjustFn: nil)
-                    }
-                }
-            }
-            didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
-        } else {
-            let renderNode = EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
-                component.layout(Constraint(maxSize: adjustedSize))
-            }
-            didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
+        let renderNode = EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
+            component.layout(Constraint(maxSize: adjustedSize))
         }
+        didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
     }
 
     private func didFinishLayout(renderNode: any RenderNode, contentOffsetAdjustFn: (() -> CGPoint)?) {
@@ -447,7 +453,7 @@ public final class ComponentEngine: @unchecked Sendable {
         }
     }
 
-    public var debugReloadsDisabled: Bool = false
+    public var debugReloadsEnabled: Bool = false
     public var debugReloadsUseBreakpoint: Bool = false
     public var debugReloadThreshold: ReloadThreshold = .default
 
@@ -456,7 +462,7 @@ public final class ComponentEngine: @unchecked Sendable {
 
     private func trackReload() {
         #if DEBUG
-            guard !debugReloadsDisabled else { return }
+            guard debugReloadsEnabled else { return }
             let now = Date()
             debugReloadTimestamps.append(now)
 
