@@ -19,7 +19,7 @@ public protocol ComponentReloadDelegate: AnyObject {
 /// `ComponentEngine` is the main class that powers the rendering of components.
 /// It manages a `ComponentDisplayableView` and handles rendering the component to the view.
 /// See `ComponentView` for a sample implementation.
-public class ComponentEngine {
+public class ComponentEngine: NSObject {
     /// A static property to disable animations during view updates.
     public static var disableUpdateAnimation: Bool = false
 
@@ -102,8 +102,6 @@ public class ComponentEngine {
         }
     }
 
-    fileprivate var tokens: Set<ObservationToken> = []
-
     /// A Boolean value that determines if the content view should be centered vertically.
     public var centerContentViewVertically = false
 
@@ -143,11 +141,8 @@ public class ComponentEngine {
         (view as? UIScrollView)?.zoomScale ?? 1
     }
 
-    /// Used for observation tracking
-    var _latestObservationToken: ObservationToken?
-
     /// Used for counting times that changes to observable models caused a reload
-   public var observationReloadCount: Int = 0
+    public var observationReloadCount: Int = 0
 
     /// Initializes a new `ComponentEngine` with the given view.
     /// - Parameter view: The `ComponentDisplayableView` to be managed by the engine.
@@ -182,59 +177,31 @@ public class ComponentEngine {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
-        observe { [weak self] iteration in
-            guard let self else { return }
-            guard !isReloading, allowReload else { return }
-            isReloading = true
-            defer {
-                reloadCount += 1
-                needsReload = false
-                isReloading = false
-                if let onFirstReload, reloadCount == 1 {
-                    onFirstReload()
-                }
-            }
-            if skipNextLayout {
-                skipNextLayout = false
-                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-                render(updateViews: true)
-            } else if asyncLayout {
-                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            } else {
-                layoutComponent(contentOffsetAdjustFn: iteration == 0 ? contentOffsetAdjustFn : nil)
-            }
-        }
-    }
-
-    private func observe(iteration: Int = 0, _ changes: @escaping (Int) -> Void) {
-        _latestObservationToken?.cancel()
-
-        let token = ObservationToken()
-        _latestObservationToken = token
-
-        withPerceptionTracking {
-            changes(iteration)
-        } onChange: { [weak self] in
-            guard token.isCancelled == false, let self else {
-                return
-            }
-
-            guard token === _latestObservationToken else {
-                return
-            }
-
-            token.cancel()
-
-            trackReload()
-
-            MainActor.assertIsolated("MUST only update models on the main thread")
-            MainActor.assumeIsolated {
-                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-                    self.observationReloadCount += 1
-                    self.observe(iteration: iteration + 1) { iteration in
-                        changes(iteration)
+        _ = MainActor.assumeIsolated {
+            observe { [weak self] in
+                guard let self else { return }
+                guard !isReloading, allowReload else { return }
+                isReloading = true
+                defer {
+                    reloadCount += 1
+                    needsReload = false
+                    isReloading = false
+                    if let onFirstReload, reloadCount == 1 {
+                        onFirstReload()
                     }
                 }
+                if skipNextLayout {
+                    skipNextLayout = false
+                    adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                    render(updateViews: true)
+                } else if asyncLayout {
+                    layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                } else {
+                    layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                }
+            } sideEffect: { [weak self] in
+                self?.trackReload()
+                self?.observationReloadCount += 1
             }
         }
     }
@@ -481,85 +448,5 @@ public class ComponentEngine {
             }
         }
 #endif
-    }
-}
-
-extension ComponentEngine {
-
-    //    final class ObservationToken: Hashable {
-    //
-    //        let id = UUID().uuidString
-    //
-    //        private var _isCancelled = false
-    //        fileprivate var isCancelled: Bool { _isCancelled }
-    //
-    //        public func cancel() {
-    //            self._isCancelled = true
-    //        }
-    //
-    //        deinit {
-    //            self.cancel()
-    //        }
-    //
-    //        // MARK: - Hashable Conformance
-    //
-    //        static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
-    //            return lhs.id == rhs.id
-    //        }
-    //
-    //        func hash(into hasher: inout Hasher) {
-    //            hasher.combine(id)
-    //        }
-    //    }
-    //
-    //    func onChange(apply: @escaping () -> Void) {
-    //        tokens.forEach({ $0.cancel() })
-    //        tokens.removeAll()
-    //
-    //        let token = ObservationToken()
-    //        self.tokens.insert(token)
-    //
-//        withPerceptionTracking(apply) { [weak self] in
-//            guard !token.isCancelled, let self else {
-//                return
-//            }
-//            RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-//                guard !token.isCancelled else {
-//                    return
-//                }
-//                token.cancel()
-//                self.onChange(apply: apply)
-//            }
-//
-//        }
-//    }
-//
-//    func observe(_ apply: @escaping () -> Void) {
-//        onChange(apply: apply)
-//    }
-}
-
-final class ObservationToken: Hashable, @unchecked Sendable {
-    let id = UUID().uuidString
-
-    private var _isCancelled = false
-    var isCancelled: Bool { _isCancelled }
-
-    public func cancel() {
-        _isCancelled = true
-    }
-
-    deinit {
-        self.cancel()
-    }
-
-    // MARK: - Hashable Conformance
-
-    static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }
