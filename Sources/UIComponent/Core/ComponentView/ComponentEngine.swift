@@ -182,50 +182,57 @@ public class ComponentEngine {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
-
-
-        guard !isReloading, allowReload else { return }
-        isReloading = true
-        defer {
-            reloadCount += 1
-            needsReload = false
-            isReloading = false
-            if let onFirstReload, reloadCount == 1 {
-                onFirstReload()
+        observe { [weak self] iteration in
+            guard let self else { return }
+            guard !isReloading, allowReload else { return }
+            isReloading = true
+            defer {
+                reloadCount += 1
+                needsReload = false
+                isReloading = false
+                if let onFirstReload, reloadCount == 1 {
+                    onFirstReload()
+                }
+            }
+            if skipNextLayout {
+                skipNextLayout = false
+                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                render(updateViews: true)
+            } else if asyncLayout {
+                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            } else {
+                layoutComponent(contentOffsetAdjustFn: iteration == 0 ? contentOffsetAdjustFn : nil)
             }
         }
-        if skipNextLayout {
-            skipNextLayout = false
-            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            render(updateViews: true)
-        } else if asyncLayout {
-            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-        } else {
-            _latestObservationToken?.cancel()
+    }
 
-            let token = ObservationToken()
-            _latestObservationToken = token
+    private func observe(iteration: Int = 0, _ changes: @escaping (Int) -> Void) {
+        _latestObservationToken?.cancel()
 
-            withPerceptionTracking {
-                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            } onChange: { [weak self] in
-                guard token.isCancelled == false, let self else {
-                    return
-                }
+        let token = ObservationToken()
+        _latestObservationToken = token
 
-                guard token === _latestObservationToken else {
-                    return
-                }
+        withPerceptionTracking {
+            changes(iteration)
+        } onChange: { [weak self] in
+            guard token.isCancelled == false, let self else {
+                return
+            }
 
-                token.cancel()
+            guard token === _latestObservationToken else {
+                return
+            }
 
-                trackReload()
+            token.cancel()
 
-                MainActor.assertIsolated("MUST only update models on the main thread")
-                MainActor.assumeIsolated {
-                    RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-                        self.observationReloadCount += 1
-                        self.reloadData(contentOffsetAdjustFn: nil)
+            trackReload()
+
+            MainActor.assertIsolated("MUST only update models on the main thread")
+            MainActor.assumeIsolated {
+                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+                    self.observationReloadCount += 1
+                    self.observe(iteration: iteration + 1) { iteration in
+                        changes(iteration)
                     }
                 }
             }
