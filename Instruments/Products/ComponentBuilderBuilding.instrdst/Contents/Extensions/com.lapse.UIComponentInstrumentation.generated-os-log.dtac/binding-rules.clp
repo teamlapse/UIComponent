@@ -13,7 +13,7 @@
     (if (eq ?instance__ FALSE) then (bind ?instance__ (create-modeler-instance)) (modify ?mod-inst-fact__ (instance ?instance__)) else (set-modeler-instance-to ?instance__))
     (assert (modeler-instance-binding (instance ?instance__) (rule 1)))
     (bind-output-table ?t0__)
-    (bind-input-table os-signpost (attribute category UIComponent) (attribute target-pid $?target-pid) (attribute subsystem "com.lapse.UIComponent"))
+    (bind-input-table os-signpost (attribute target-pid $?target-pid) (attribute category UIComponent) (attribute subsystem "com.lapse.UIComponent"))
     (assert (modeler-instance-param (instance ?instance__) (name target-pid) (value ?target-pid)))
 )
 (defrule bootstrap-rule-1
@@ -32,7 +32,7 @@
     (if (eq ?instance__ FALSE) then (bind ?instance__ (create-modeler-instance)) (modify ?mod-inst-fact__ (instance ?instance__)) else (set-modeler-instance-to ?instance__))
     (assert (modeler-instance-binding (instance ?instance__) (rule 2)))
     (bind-output-table ?t0__)
-    (bind-input-table os-signpost (attribute category UIComponent) (attribute subsystem "com.lapse.UIComponent"))
+    (bind-input-table os-signpost (attribute subsystem "com.lapse.UIComponent") (attribute category UIComponent))
 )
 (defrule bootstrap-rule-2
     (declare (salience -100))
@@ -51,7 +51,7 @@
     (if (eq ?instance__ FALSE) then (bind ?instance__ (create-modeler-instance)) (modify ?mod-inst-fact__ (instance ?instance__)) else (set-modeler-instance-to ?instance__))
     (assert (modeler-instance-binding (instance ?instance__) (rule 3)))
     (bind-output-table ?t0__)
-    (bind-input-table os-signpost (attribute target-pid $?target-pid) (attribute subsystem "com.lapse.UIComponent") (attribute category UIComponent))
+    (bind-input-table os-signpost (attribute category UIComponent) (attribute target-pid $?target-pid) (attribute subsystem "com.lapse.UIComponent"))
     (assert (modeler-instance-param (instance ?instance__) (name target-pid) (value ?target-pid)))
 )
 (defrule bootstrap-rule-3
@@ -70,7 +70,7 @@
     (if (eq ?instance__ FALSE) then (bind ?instance__ (create-modeler-instance)) (modify ?mod-inst-fact__ (instance ?instance__)) else (set-modeler-instance-to ?instance__))
     (assert (modeler-instance-binding (instance ?instance__) (rule 4)))
     (bind-output-table ?t0__)
-    (bind-input-table os-signpost (attribute subsystem "com.lapse.UIComponent") (attribute category UIComponent))
+    (bind-input-table os-signpost (attribute category UIComponent) (attribute subsystem "com.lapse.UIComponent"))
 )
 (defrule bootstrap-rule-4
     (declare (salience -100))

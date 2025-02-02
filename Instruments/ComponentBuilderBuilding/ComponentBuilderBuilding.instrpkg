@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <package>
-    <id>com.lapse.ComponentBuilderBuilding</id>
-    <title>Build Components</title>
+    <id>com.lapse.UIComponentInstrumentation</id>
+    <title>UIComponent Instrumentation</title>
     <owner>
         <name>Alex Little</name>
     </owner>
@@ -12,7 +12,7 @@
 
         <subsystem>"com.lapse.UIComponent"</subsystem>
         <category>"UIComponent"</category>
-        <name>"Build Components"</name>
+        <name>"ComponentBuilder"</name>
 
         <start-pattern>
             <message>"Component:" ?component-name</message>
