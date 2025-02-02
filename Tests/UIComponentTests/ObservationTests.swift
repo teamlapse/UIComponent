@@ -201,7 +201,7 @@ struct ObservationTests {
         withKnownIssue {
             view.componentEngine.debugReloadThreshold = .reloads(count: 100, timeWindow: 0.1)
         } matching: { issue in
-            issue.description == "Issue recorded: Abnormally high reload threshold chosen, find the earliest opportunity to optimise"
+            issue.description == "Issue recorded: Abnormally high reload threshold, find the earliest opportunity to optimise"
         }
     }
 
