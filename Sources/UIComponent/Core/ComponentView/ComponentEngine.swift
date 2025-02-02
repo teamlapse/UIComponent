@@ -4,6 +4,10 @@
 import UIKit
 import Perception
 
+#if DEBUG
+import IssueReporting
+#endif
+
 /// Protocol defining a delegate responsible for determining if a component view should be reloaded.
 public protocol ComponentReloadDelegate: AnyObject {
     /// Asks the delegate if the component view should be reloaded.
@@ -32,7 +36,7 @@ public class ComponentEngine {
 
     /// The component that will be rendered.
     var component: (any Component)? {
-        didSet { setNeedsReload() }
+        didSet { observationReloadCount = 0; setNeedsReload() }
     }
 
     /// The default animator for the components rendered by this engine.
@@ -139,6 +143,12 @@ public class ComponentEngine {
         (view as? UIScrollView)?.zoomScale ?? 1
     }
 
+    /// Used for observation tracking
+    var _latestObservationToken: ObservationToken?
+
+    /// Used for counting times that changes to observable models caused a reload
+   public var observationReloadCount: Int = 0
+
     /// Initializes a new `ComponentEngine` with the given view.
     /// - Parameter view: The `ComponentDisplayableView` to be managed by the engine.
     init(view: ComponentDisplayableView) {
@@ -172,30 +182,24 @@ public class ComponentEngine {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
-        
-        observe { [weak self] in
-            guard let self else {
-                return
+        guard !isReloading, allowReload else { return }
+        isReloading = true
+        defer {
+            reloadCount += 1
+            needsReload = false
+            isReloading = false
+            if let onFirstReload, reloadCount == 1 {
+                onFirstReload()
             }
-            guard !isReloading, allowReload else { return }
-            isReloading = true
-            defer {
-                reloadCount += 1
-                needsReload = false
-                isReloading = false
-                if let onFirstReload, reloadCount == 1 {
-                    onFirstReload()
-                }
-            }
-            if skipNextLayout {
-                skipNextLayout = false
-                adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-                render(updateViews: true)
-            } else if asyncLayout {
-                layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            } else {
-                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            }
+        }
+        if skipNextLayout {
+            skipNextLayout = false
+            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            render(updateViews: true)
+        } else if asyncLayout {
+            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+        } else {
+            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
         }
     }
 
@@ -221,12 +225,40 @@ public class ComponentEngine {
         guard let componentView = view, let component else {
             return
         }
-            
-            let adjustedSize = self.adjustedSize
-            let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
+
+        _latestObservationToken?.cancel()
+
+        let token = ObservationToken()
+        _latestObservationToken = token
+
+        let adjustedSize = self.adjustedSize
+        let renderNode = withPerceptionTracking {
+            EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
                 component.layout(Constraint(maxSize:adjustedSize))
             }
-            didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
+        } onChange: { [weak self] in
+            guard token.isCancelled == false, let self else {
+                return
+            }
+
+            guard token === _latestObservationToken else {
+                return
+            }
+
+            token.cancel()
+
+            trackReload()
+
+            MainActor.assertIsolated("MUST only update models on the main thread")
+            MainActor.assumeIsolated {
+                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+                    self.observationReloadCount += 1
+                    self.layoutComponent(contentOffsetAdjustFn: nil)
+                }
+            }
+        }
+
+        didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
     }
 
     private func didFinishLayout(renderNode: any RenderNode, contentOffsetAdjustFn: (() -> CGPoint)?) {
@@ -389,62 +421,136 @@ public class ComponentEngine {
         self.renderNode = renderNode
         self.skipNextLayout = true
     }
-    
 
+    public struct ReloadThreshold {
+        public let count: Int
+        public let timeWindow: TimeInterval
+
+        public static let `default` = ReloadThreshold(count: 5, timeWindow: 1.0)
+
+        public static func reloads(count: Int = 5, timeWindow: TimeInterval = 1) -> ReloadThreshold {
+#if DEBUG
+            if count >= 100 {
+                withIssueReporters([.runtimeWarning]) {
+                    reportIssue("Abnormally high reload threshold, find the earliest opportunity to optimise")
+                }
+            }
+#endif
+
+            return ReloadThreshold(count: count, timeWindow: timeWindow)
+        }
+    }
+
+    public var debugReloadsDisabled: Bool = false
+    public var debugReloadsUseBreakpoint: Bool = false
+    public var debugReloadThreshold: ReloadThreshold = .default
+
+    private var debugReloadTimestamps: [Date] = []
+    private let debugReloadTracking = DispatchQueue(label: "com.component.reloadTracking")
+
+    private func trackReload() {
+#if DEBUG
+        guard !debugReloadsDisabled else { return }
+        let now = Date()
+        debugReloadTimestamps.append(now)
+
+        // Remove timestamps outside the time window
+        debugReloadTimestamps = debugReloadTimestamps.filter {
+            now.timeIntervalSince($0) <= self.debugReloadThreshold.timeWindow
+        }
+
+        // Check if we've exceeded the threshold
+        if debugReloadTimestamps.count >= debugReloadThreshold.count {
+            let componentDesc = component.map { String(describing: $0) } ?? "unknown"
+            // We plus one on the count because we report the issue optimistically so we have an accurate stacktrace
+            let message = """
+                    Excessive updates: \(debugReloadTimestamps.count) reloads/\(debugReloadThreshold.timeWindow)s
+                    Optimise observable model updates in heirarchy for \(componentDesc)
+                    """
+            withIssueReporters([.runtimeWarning, debugReloadsUseBreakpoint ? .breakpoint : nil].compactMap { $0 }) {
+                reportIssue(message)
+            }
+        }
+#endif
+    }
 }
 
 extension ComponentEngine {
-    
-    final class ObservationToken: Hashable {
-        
-        let id = UUID().uuidString
-        
-        private var _isCancelled = false
-        fileprivate var isCancelled: Bool { _isCancelled }
-        
-        public func cancel() {
-            self._isCancelled = true
-        }
-        
-        deinit {
-            self.cancel()
-        }
-        
-        // MARK: - Hashable Conformance
-        
-        static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
-            return lhs.id == rhs.id
-        }
-        
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(id)
-        }
+
+    //    final class ObservationToken: Hashable {
+    //
+    //        let id = UUID().uuidString
+    //
+    //        private var _isCancelled = false
+    //        fileprivate var isCancelled: Bool { _isCancelled }
+    //
+    //        public func cancel() {
+    //            self._isCancelled = true
+    //        }
+    //
+    //        deinit {
+    //            self.cancel()
+    //        }
+    //
+    //        // MARK: - Hashable Conformance
+    //
+    //        static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
+    //            return lhs.id == rhs.id
+    //        }
+    //
+    //        func hash(into hasher: inout Hasher) {
+    //            hasher.combine(id)
+    //        }
+    //    }
+    //
+    //    func onChange(apply: @escaping () -> Void) {
+    //        tokens.forEach({ $0.cancel() })
+    //        tokens.removeAll()
+    //
+    //        let token = ObservationToken()
+    //        self.tokens.insert(token)
+    //
+//        withPerceptionTracking(apply) { [weak self] in
+//            guard !token.isCancelled, let self else {
+//                return
+//            }
+//            RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+//                guard !token.isCancelled else {
+//                    return
+//                }
+//                token.cancel()
+//                self.onChange(apply: apply)
+//            }
+//            
+//        }
+//    }
+//    
+//    func observe(_ apply: @escaping () -> Void) {
+//        onChange(apply: apply)
+//    }
+}
+
+final class ObservationToken: Hashable, @unchecked Sendable {
+    let id = UUID().uuidString
+
+    private var _isCancelled = false
+    var isCancelled: Bool { _isCancelled }
+
+    public func cancel() {
+        _isCancelled = true
     }
-    
-    func onChange(apply: @escaping () -> Void) {
-        tokens.forEach({ $0.cancel() })
-        tokens.removeAll()
-        
-        let token = ObservationToken()
-        self.tokens.insert(token)
-        
-        withPerceptionTracking(apply) { [weak self] in
-            guard !token.isCancelled, let self else {
-                return
-            }
-            RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-                guard !token.isCancelled else {
-                    return
-                }
-                token.cancel()
-                self.onChange(apply: apply)
-            }
-            
-        }
+
+    deinit {
+        self.cancel()
     }
-    
-    func observe(_ apply: @escaping () -> Void) {
-        onChange(apply: apply)
+
+    // MARK: - Hashable Conformance
+
+    static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
+        lhs.id == rhs.id
     }
-    
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }

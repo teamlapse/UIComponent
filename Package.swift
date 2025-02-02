@@ -15,6 +15,7 @@ let package = Package(
         )
     ],
     dependencies: [
+        .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-perception", exact: "1.1.3")
     ],
     targets: [
@@ -23,6 +24,7 @@ let package = Package(
         .target(
             name: "UIComponent",
             dependencies: [
+                .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
                 .product(name: "Perception", package: "swift-perception")
             ]
         ),
