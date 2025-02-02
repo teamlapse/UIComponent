@@ -23,6 +23,34 @@ struct TestView: ComponentBuilder {
     }
 }
 
+@Perceptible
+class LazyRenderNodeModel {
+    var color: UIColor
+
+    init(color: UIColor) {
+        self.color = color
+    }
+}
+
+struct TestLazyView: ComponentBuilder {
+    let model: LazyRenderNodeModel
+
+    func build() -> some Component {
+        ObservationBoundaryComponent(component: BottomLevel(model: model))
+            .fill()
+    }
+
+    struct BottomLevel: ComponentBuilder {
+        let model: LazyRenderNodeModel
+
+        func build() -> some Component {
+            ViewComponent<UIView>()
+                .backgroundColor(model.color)
+                .size(width: 40, height: 40)
+        }
+    }
+}
+
 struct DeepViewParent: ComponentBuilder {
     let model: TestModel
 
@@ -102,6 +130,27 @@ struct ObservationTests {
 
         #expect(view.componentEngine.observationReloadCount == 1)
         #expect((view.subviews.first as? UILabel)?.text == "updated")
+    }
+
+    @Test func testBasicObservationWithLazyRenderNode() throws {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
+        let model = LazyRenderNodeModel(color: .red)
+
+        view.componentEngine.component = TestLazyView(model: model)
+        view.componentEngine.reloadData()
+
+        view.subviews.first?.componentEngine.reloadData()
+
+        #expect(view.componentEngine.observationReloadCount == 0)
+        #expect(view.subviews.first?.componentEngine.observationReloadCount == 0)
+        #expect(view.subviews.first?.subviews.first?.backgroundColor == .red)
+
+        model.color = .blue
+        RunLoop.syncMain()
+
+        #expect(view.componentEngine.observationReloadCount == 0)
+        #expect(view.subviews.first?.componentEngine.observationReloadCount == 1)
+        #expect(view.subviews.first?.subviews.first?.backgroundColor == .blue)
     }
 
     @Test func testMultipleUpdatesInOneRunloopIteration() throws {
