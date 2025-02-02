@@ -1,6 +1,9 @@
 //  Created by Luke Zhao on 8/27/20.
 
-
+#if DEBUG
+    import IssueReporting
+#endif
+import Perception
 import UIKit
 
 /// Protocol defining a delegate responsible for determining if a component engine should be reloaded.
@@ -13,12 +16,12 @@ public protocol ComponentEngineReloadDelegate: AnyObject {
 
 /// `ComponentEngine` is the main class that powers the rendering of components.
 /// It manages a `UIView` and handles rendering the component to the view.
-public final class ComponentEngine {
+public final class ComponentEngine: NSObject, @unchecked Sendable {
     /// A static property to disable animations during view updates.
     public static var disableUpdateAnimation: Bool = false
-    
+
     /// A static weak reference to a delegate that decides if a component engine should reload.
-    public static weak var reloadDelegate: ComponentEngineReloadDelegate?
+    public weak static var reloadDelegate: ComponentEngineReloadDelegate?
 
     private static let asyncLayoutQueue = DispatchQueue(label: "com.component.layout", qos: .userInteractive)
 
@@ -30,7 +33,10 @@ public final class ComponentEngine {
 
     /// The component that will be rendered.
     public var component: (any Component)? {
-        didSet { setNeedsReload() }
+        didSet {
+            observationReloadCount = 0
+            setNeedsReload()
+        }
     }
 
     /// The default animator for the components rendered by this engine.
@@ -98,7 +104,7 @@ public final class ComponentEngine {
 
     /// A Boolean value that determines if the content view should be centered vertically.
     public var centerContentViewVertically = false
-    
+
     /// A Boolean value that determines if the content view should be centered horizontally.
     public var centerContentViewHorizontally = true
 
@@ -108,32 +114,38 @@ public final class ComponentEngine {
             (view as? UIScrollView)?.contentSize = contentSize
         }
     }
-    
+
     /// The offset of the scrolled content.
     var contentOffset: CGPoint {
         get { view?.bounds.origin ?? .zero }
         set { view?.bounds.origin = newValue }
     }
-    
+
     /// The insets applied to the content of the view.
     var contentInset: UIEdgeInsets {
         (view as? UIScrollView)?.adjustedContentInset ?? .zero
     }
-    
+
     /// The bounds of the view.
     var bounds: CGRect {
         view?.bounds ?? .zero
     }
-    
+
     /// The size of the view adjusted for the content inset.
     var adjustedSize: CGSize {
         bounds.size.inset(by: contentInset)
     }
-    
+
     /// The scale at which the content of the view is zoomed.
     var zoomScale: CGFloat {
         (view as? UIScrollView)?.zoomScale ?? 1
     }
+
+    /// Used for observation tracking
+//    var _latestObservationToken: ObservationToken?
+
+    /// Used for counting times that changes to observable models caused a reload
+    public var observationReloadCount: Int = 0
 
     /// Initializes a new `ComponentEngine` with the given view.
     /// - Parameter view: The `UIView` to be managed by the engine.
@@ -168,26 +180,68 @@ public final class ComponentEngine {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     public func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
-        guard !isReloading, allowReload else { return }
-        isReloading = true
-        defer {
-            reloadCount += 1
-            needsReload = false
-            isReloading = false
-            if let onFirstReload, let view, reloadCount == 1 {
-                onFirstReload(view)
+        MainActor.assertIsolated()
+        _ = MainActor.assumeIsolated {
+            observe { [weak self] in
+                guard let self else { return }
+                guard !isReloading, allowReload else { return }
+                isReloading = true
+                defer {
+                    reloadCount += 1
+                    needsReload = false
+                    isReloading = false
+                    if let onFirstReload, let view, reloadCount == 1 {
+                        onFirstReload(view)
+                    }
+                }
+
+                if renderOnly {
+                    adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                    render(updateViews: true)
+                } else if asyncLayout {
+                    layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                } else {
+                    layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+                }
+            } sideEffect: {
+                self.trackReload()
+                self.observationReloadCount += 1
             }
         }
-
-        if renderOnly {
-            adjustContentOffset(contentOffsetAdjustFn: contentOffsetAdjustFn)
-            render(updateViews: true)
-        } else if asyncLayout {
-            layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
-        } else {
-            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
-        }
     }
+
+//    private func observe(iteration: Int = 0, _ changes: @escaping (Int) -> Void) {
+//        _latestObservationToken?.cancel()
+//
+//        let token = ObservationToken()
+//        _latestObservationToken = token
+//
+//        withPerceptionTracking {
+//            changes(iteration)
+//        } onChange: { [weak self] in
+//            guard token.isCancelled == false, let self else {
+//                return
+//            }
+//
+//            guard token === _latestObservationToken else {
+//                return
+//            }
+//
+//            token.cancel()
+//
+//            trackReload()
+//
+//            MainActor.assertIsolated("MUST only update models on the main thread")
+//            MainActor.assumeIsolated {
+//                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+//                    self.observationReloadCount += 1
+//                    self.observe(iteration: iteration + 1) { iteration in
+//                        changes(iteration)
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private var asyncLayoutID: UUID?
     private func layoutComponentAsync(contentOffsetAdjustFn: (() -> CGPoint)?) {
@@ -209,11 +263,9 @@ public final class ComponentEngine {
 
     private func layoutComponent(contentOffsetAdjustFn: (() -> CGPoint)?) {
         guard let view, let component else { return }
-
         let renderNode = EnvironmentValues.with(values: .init(\.hostingView, value: view)) {
             component.layout(Constraint(maxSize: adjustedSize))
         }
-        
         didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
     }
 
@@ -267,7 +319,7 @@ public final class ComponentEngine {
         var newViews = [UIView?](repeating: nil, count: newVisibleRenderables.count)
 
         // 1st pass, delete all removed cells and move existing cells
-        for index in 0..<visibleViews.count {
+        for index in 0 ..< visibleViews.count {
             let renderable = visibleRenderables[index]
             let id = renderable.id
             let cell = visibleViews[index]
@@ -296,7 +348,8 @@ public final class ComponentEngine {
                     animator.shift(hostingView: view, delta: contentOffsetDelta, view: cell)
                 }
             } else {
-                cell = renderable.renderNode._makeView()
+                let engineId = String(Int(bitPattern: ObjectIdentifier(self)))
+                cell = renderable.renderNode._makeView(engineId: engineId)
                 UIView.performWithoutAnimation {
                     cell.bounds.size = frame.bounds.size
                     cell.center = frame.center
@@ -325,7 +378,7 @@ public final class ComponentEngine {
     // MARK: - Data Caching
 
     private lazy var cachingData: [String: Any] = [:]
-    internal func loadCachingData<T>(id: String, generator: () -> T) -> T {
+    func loadCachingData<T>(id: String, generator: () -> T) -> T {
         let data = (cachingData[id] as? T) ?? generator()
         cachingData[id] = data
         return data
@@ -383,15 +436,66 @@ public final class ComponentEngine {
     public func reloadWithExisting(component: any Component, renderNode: any RenderNode) {
         self.component = component
         self.renderNode = renderNode
-        self.renderOnly = true
+        renderOnly = true
+    }
+
+    public struct ReloadThreshold {
+        public let count: Int
+        public let timeWindow: TimeInterval
+
+        public static let `default` = ReloadThreshold(count: 5, timeWindow: 1.0)
+
+        public static func reloads(count: Int = 5, timeWindow: TimeInterval = 1) -> ReloadThreshold {
+            #if DEBUG
+                if count >= 100 {
+                    withIssueReporters([.runtimeWarning]) {
+                        reportIssue("Abnormally high reload threshold, find the earliest opportunity to optimise")
+                    }
+                }
+            #endif
+
+            return ReloadThreshold(count: count, timeWindow: timeWindow)
+        }
+    }
+
+    public var debugReloadsEnabled: Bool = false
+    public var debugReloadsUseBreakpoint: Bool = false
+    public var debugReloadThreshold: ReloadThreshold = .default
+
+    private var debugReloadTimestamps: [Date] = []
+    private let debugReloadTracking = DispatchQueue(label: "com.component.reloadTracking")
+
+    private func trackReload() {
+        #if DEBUG
+            guard debugReloadsEnabled else { return }
+            let now = Date()
+            debugReloadTimestamps.append(now)
+
+            // Remove timestamps outside the time window
+            debugReloadTimestamps = debugReloadTimestamps.filter {
+                now.timeIntervalSince($0) <= self.debugReloadThreshold.timeWindow
+            }
+
+            // Check if we've exceeded the threshold
+            if debugReloadTimestamps.count >= debugReloadThreshold.count {
+                let componentDesc = component.map { String(describing: $0) } ?? "unknown"
+                // We plus one on the count because we report the issue optimistically so we have an accurate stacktrace
+                let message = """
+                Excessive updates: \(debugReloadTimestamps.count) reloads/\(debugReloadThreshold.timeWindow)s
+                Optimise observable model updates in heirarchy for \(componentDesc)
+                """
+                withIssueReporters([.runtimeWarning, debugReloadsUseBreakpoint ? .breakpoint : nil].compactMap { $0 }) {
+                    reportIssue(message)
+                }
+            }
+        #endif
     }
 }
 
-
 /// Extension to provide additional functionalities to view lookup and frame calculation.
-extension ComponentEngine {
+public extension ComponentEngine {
     /// Returns the view at a given point if it exists within the visible views.
-    public func view(at point: CGPoint) -> UIView? {
+    func view(at point: CGPoint) -> UIView? {
         guard let view else { return nil }
         return visibleViews.first {
             $0.point(inside: $0.convert(point, from: view), with: nil)
@@ -399,12 +503,12 @@ extension ComponentEngine {
     }
 
     /// Returns the frame associated with a given identifier if it exists within the render node.
-    public func frame(id: String) -> CGRect? {
+    func frame(id: String) -> CGRect? {
         renderNode?.frame(id: id)
     }
 
     /// Returns the visible view associated with a given identifier if it exists within the visible renderables.
-    public func visibleView(id: String) -> UIView? {
+    func visibleView(id: String) -> UIView? {
         for (view, renderable) in zip(visibleViews, visibleRenderables) {
             if renderable.id == id {
                 return view
@@ -413,7 +517,7 @@ extension ComponentEngine {
         return nil
     }
 
-    @discardableResult public func scrollTo(id: String, animated: Bool) -> Bool {
+    @discardableResult func scrollTo(id: String, animated: Bool) -> Bool {
         if let frame = renderNode?.frame(id: id), let view = view as? UIScrollView {
             view.scrollRectToVisible(frame, animated: animated)
             return true
@@ -422,3 +526,28 @@ extension ComponentEngine {
         }
     }
 }
+
+//final class ObservationToken: Hashable, @unchecked Sendable {
+//    let id = UUID().uuidString
+//
+//    private var _isCancelled = false
+//    var isCancelled: Bool { _isCancelled }
+//
+//    public func cancel() {
+//        _isCancelled = true
+//    }
+//
+//    deinit {
+//        self.cancel()
+//    }
+//
+//    // MARK: - Hashable Conformance
+//
+//    static func == (lhs: ObservationToken, rhs: ObservationToken) -> Bool {
+//        lhs.id == rhs.id
+//    }
+//
+//    func hash(into hasher: inout Hasher) {
+//        hasher.combine(id)
+//    }
+//}
