@@ -10,13 +10,13 @@ public struct VisibleBoundsObserverComponent<Content: Component>: Component {
     /// - Parameters:
     ///   - size: The new size of the content component
     ///   - rect: The new rectangle of the visible bounds in the component coordinate space.
-    public let onVisibleBoundsChanged: (CGSize, CGRect) -> ()
+    public let onVisibleBoundsChanged: @MainActor (CGSize, CGRect) -> ()
 
     /// Initializes a new `VisibleBoundsObserverComponent` with the given content and a closure to call when the visible bounds change.
     /// - Parameters:
     ///   - content: The content component to observe.
     ///   - onVisibleBoundsChanged: A closure that is called with the new size and visible rectangle when the visible bounds change.
-    public init(content: Content, onVisibleBoundsChanged: @escaping (CGSize, CGRect) -> Void) {
+    public init(content: Content, onVisibleBoundsChanged: @escaping @MainActor (CGSize, CGRect) -> Void) {
         self.content = content
         self.onVisibleBoundsChanged = onVisibleBoundsChanged
     }
@@ -34,19 +34,21 @@ public struct VisibleBoundsObserverRenderNode<Content: RenderNode>: RenderNodeWr
     /// - Parameters:
     ///   - size: The size of the content render node.
     ///   - rect: The new visible bounds.
-    public let onVisibleBoundsChanged: (CGSize, CGRect) -> ()
+    public let onVisibleBoundsChanged: @MainActor (CGSize, CGRect) -> ()
 
     /// Initializes a new instance of `VisibleBoundsObserverRenderNode`.
     /// - Parameters:
     ///   - content: The content render node to observe.
     ///   - onVisibleBoundsChanged: A closure that is called with the new size and visible rectangle when the visible bounds change.
-    public init(content: Content, onVisibleBoundsChanged: @escaping (CGSize, CGRect) -> Void) {
+    public init(content: Content, onVisibleBoundsChanged: @escaping @MainActor (CGSize, CGRect) -> Void) {
         self.content = content
         self.onVisibleBoundsChanged = onVisibleBoundsChanged
     }
 
     public func visibleChildren(in frame: CGRect) -> [RenderNodeChild] {
-        onVisibleBoundsChanged(size, frame)
+        MainActor.assumeIsolated {
+            onVisibleBoundsChanged(size, frame)
+        }
         return content.visibleChildren(in: frame)
     }
 }

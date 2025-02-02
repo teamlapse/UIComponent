@@ -17,13 +17,13 @@ public struct TappableViewComponent: Component {
     public let component: any Component
     
     /// The closure to be called when the tappable view is tapped.
-    public let onTap: ((TappableView) -> Void)?
+    public let onTap: (@MainActor (TappableView) -> Void)?
 
     /// Initializes a new `TappableViewComponent` with the given component and optional tap handler.
     /// - Parameters:
     ///   - component: The component to be made tappable.
     ///   - onTap: An optional closure that is called when the tappable view is tapped.
-    public init(component: any Component, onTap: ((TappableView) -> Void)? = nil) {
+    public init(component: any Component, onTap: (@MainActor (TappableView) -> Void)? = nil) {
         self.component = component
         self.onTap = onTap
     }
@@ -49,7 +49,7 @@ public struct TappableViewRenderNode: RenderNode {
     public let content: any RenderNode
     
     /// The closure to be called when the tappable view is tapped.
-    public let onTap: ((TappableView) -> Void)?
+    public let onTap: (@MainActor (TappableView) -> Void)?
     
     /// The configuration for the tappable view.
     public let config: TappableViewConfig?

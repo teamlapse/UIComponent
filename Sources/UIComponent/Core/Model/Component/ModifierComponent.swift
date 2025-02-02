@@ -18,14 +18,14 @@ public struct ModifierComponent<Content: Component, Result: RenderNode>: Compone
     public let content: Content
     
     /// The modifier closure that takes the original component's `RenderNode` and returns a modified `RenderNode`.
-    public let modifier: (Content.R) -> Result
+    public let modifier: @MainActor (Content.R) -> Result
 
     /// Initializes a new `ModifierComponent` with the provided content and modifier.
     ///
     /// - Parameters:
     ///   - content: The original content component.
     ///   - modifier: A closure that modifies the content's `RenderNode`.
-    public init(content: Content, modifier: @escaping (Content.R) -> Result) {
+    public init(content: Content, modifier: @escaping @MainActor (Content.R) -> Result) {
         self.content = content
         self.modifier = modifier
     }
@@ -35,6 +35,8 @@ public struct ModifierComponent<Content: Component, Result: RenderNode>: Compone
     /// - Parameter constraint: The constraints to use when laying out the content.
     /// - Returns: A modified `RenderNode` after applying the modifier to the content's layout result.
     public func layout(_ constraint: Constraint) -> Result {
-        modifier(content.layout(constraint))
+        MainActor.assumeIsolated {
+            modifier(content.layout(constraint))
+        }
     }
 }

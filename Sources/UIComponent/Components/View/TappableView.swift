@@ -101,7 +101,7 @@ open class TappableView: ComponentView {
     public var previewBackgroundColor: UIColor?
     
     /// A closure that is called when the TappableView is tapped.
-    public var onTap: ((TappableView) -> Void)? {
+    public var onTap: (@MainActor (TappableView) -> Void)? {
         didSet {
             if onTap != nil {
                 addGestureRecognizer(tapGestureRecognizer)
@@ -112,7 +112,7 @@ open class TappableView: ComponentView {
     }
 
     /// A closure that is called when a long press gesture is recognized on the TappableView.
-    public var onLongPress: ((TappableView, UILongPressGestureRecognizer) -> Void)? {
+    public var onLongPress: (@MainActor (TappableView, UILongPressGestureRecognizer) -> Void)? {
         didSet {
             if onLongPress != nil {
                 addGestureRecognizer(longPressGestureRecognizer)
@@ -123,7 +123,7 @@ open class TappableView: ComponentView {
     }
 
     /// A closure that is called when the TappableView is double-tapped.
-    public var onDoubleTap: ((TappableView) -> Void)? {
+    public var onDoubleTap: (@MainActor (TappableView) -> Void)? {
         didSet {
             if onDoubleTap != nil {
                 addGestureRecognizer(doubleTapGestureRecognizer)
@@ -155,7 +155,7 @@ open class TappableView: ComponentView {
 
     /// A closure that provides a preview view controller to be displayed when the TappableView is used in a context menu.
     /// Setting this property will add a context menu interaction if it's not already present.
-    public var previewProvider: (() -> UIViewController?)? {
+    public var previewProvider: (@MainActor () -> UIViewController?)? {
         didSet {
             if previewProvider != nil || contextMenuProvider != nil {
                 addInteraction(contextMenuInteraction)
@@ -166,11 +166,11 @@ open class TappableView: ComponentView {
     }
 
     /// A closure that is called when the context menu preview is committed.
-    public var onCommitPreview: ((UIContextMenuInteractionCommitAnimating) -> Void)?
+    public var onCommitPreview: (@MainActor (UIContextMenuInteractionCommitAnimating) -> Void)?
 
     /// A closure that provides a context menu to be displayed when the TappableView is long-pressed.
     /// Setting this property will add a context menu interaction if it's not already present.
-    public var contextMenuProvider: ((TappableView) -> UIMenu?)? {
+    public var contextMenuProvider: (@MainActor (TappableView) -> UIMenu?)? {
         didSet {
             if previewProvider != nil || contextMenuProvider != nil {
                 addInteraction(contextMenuInteraction)

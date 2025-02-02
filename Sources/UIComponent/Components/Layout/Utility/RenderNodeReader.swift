@@ -8,20 +8,20 @@ public struct RenderNodeReader<ChildComponent: Component>: Component {
     /// The content component that this `RenderNodeReader` will use for layout.
     public let content: ChildComponent
     /// The closure that will be called with the layout result of the content component.
-    public let reader: (ChildComponent.R) -> Void
+    public let reader: @MainActor (ChildComponent.R) -> Void
 
     /// Initializes a new `RenderNodeReader` with a content component and a reader closure.
     /// - Parameters:
     ///   - content: The content component that will be laid out.
     ///   - reader: A closure that is called with the result of the content's layout.
-    public init(content: ChildComponent, _ reader: @escaping (ChildComponent.R) -> Void) {
+    public init(content: ChildComponent, _ reader: @escaping @MainActor (ChildComponent.R) -> Void) {
         self.content = content
         self.reader = reader
     }
 
     public func layout(_ constraint: Constraint) -> some RenderNode {
         let renderNode = content.layout(constraint)
-        reader(renderNode)
+        MainActor.assumeIsolated { reader(renderNode) }
         return renderNode
     }
 }

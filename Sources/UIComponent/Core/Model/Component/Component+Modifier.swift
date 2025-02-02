@@ -81,7 +81,7 @@ extension Component {
     /// Registers a closure to be called when the component is updated.
     /// - Parameter update: A closure that takes the component's underlying view as its parameter.
     /// - Returns: An `UpdateComponent` that represents the modified component with an update closure.
-    public func update(_ update: @escaping (R.View) -> Void) -> UpdateComponent<Self> {
+    public func update(_ update: @escaping @MainActor (R.View) -> Void) -> UpdateComponent<Self> {
         ModifierComponent(content: self) {
             $0.update(update)
         }
@@ -515,14 +515,14 @@ extension Component {
     /// Provides a reader for the render node of the component.
     /// - Parameter reader: A closure that receives the render node.
     /// - Returns: A `RenderNodeReader` component that allows reading the render node.
-    public func renderNodeReader(_ reader: @escaping (Self.R) -> Void) -> RenderNodeReader<Self> {
+    public func renderNodeReader(_ reader: @escaping @MainActor (Self.R) -> Void) -> RenderNodeReader<Self> {
         RenderNodeReader(content: self, reader)
     }
 
     /// Adds a callback to be invoked when the visible bounds of the component change.
     /// - Parameter callback: A closure that is called with the new size and visible rectangle.
     /// - Returns: A `VisibleBoundsObserverComponent` that invokes the callback when the visible bounds change.
-    public func onVisibleBoundsChanged(_ callback: @escaping (CGSize, CGRect) -> Void) -> VisibleBoundsObserverComponent<Self> {
+    public func onVisibleBoundsChanged(_ callback: @escaping @MainActor (CGSize, CGRect) -> Void) -> VisibleBoundsObserverComponent<Self> {
         VisibleBoundsObserverComponent(content: self, onVisibleBoundsChanged: callback)
     }
 
@@ -573,7 +573,7 @@ extension Component {
     /// - Parameters:
     ///   - onTap: The closure to be called when the tappable view is tapped.
     public func tappableView(
-        _ onTap: @escaping (TappableView) -> Void
+        _ onTap: @escaping @MainActor (TappableView) -> Void
     ) -> TappableViewComponent {
         TappableViewComponent(
             component: self,
@@ -585,7 +585,7 @@ extension Component {
     /// - Parameters:
     ///   - onTap: The closure to be called when the tappable view is tapped.
     public func tappableView(
-        _ onTap: @escaping () -> Void
+        _ onTap: @escaping @MainActor () -> Void
     ) -> TappableViewComponent {
         tappableView { _ in
             onTap()
