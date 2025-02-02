@@ -22,7 +22,7 @@ public protocol ComponentReloadDelegate: AnyObject {
 public class ComponentEngine {
     /// A static property to disable animations during view updates.
     public static var disableUpdateAnimation: Bool = false
-    
+
     /// A static weak reference to a delegate that decides if a component view should reload.
     public static weak var reloadDelegate: ComponentReloadDelegate?
 
@@ -49,22 +49,22 @@ public class ComponentEngine {
 
     /// Internal state to track if a reload is needed.
     var needsReload = true
-    
+
     /// Internal state to track if a render is needed.
     var needsRender = false
-    
+
     /// Internal state to determine if the next layout should be skipped.
     var skipNextLayout = false
 
     /// The number of times the view has been reloaded.
     var reloadCount = 0
-    
+
     /// Internal state to track if the engine is currently rendering.
     var isRendering = false
-    
+
     /// Internal state to track if the engine is currently reloading.
     var isReloading = false
-    
+
     /// A computed property to determine if reloading is allowed by consulting the `reloadDelegate`.
     var allowReload: Bool {
         guard let view, let reloadDelegate = Self.reloadDelegate else { return true }
@@ -79,7 +79,7 @@ public class ComponentEngine {
 
     /// An array of visible views on the screen.
     var visibleViews: [UIView] = []
-    
+
     /// An array of `Renderable` objects corresponding to the visible views.
     var visibleRenderable: [Renderable] = []
 
@@ -103,10 +103,10 @@ public class ComponentEngine {
     }
 
     fileprivate var tokens: Set<ObservationToken> = []
-    
+
     /// A Boolean value that determines if the content view should be centered vertically.
     public var centerContentViewVertically = false
-    
+
     /// A Boolean value that determines if the content view should be centered horizontally.
     public var centerContentViewHorizontally = true
 
@@ -116,28 +116,28 @@ public class ComponentEngine {
             (view as? UIScrollView)?.contentSize = contentSize
         }
     }
-    
+
     /// The offset of the scrolled content.
     var contentOffset: CGPoint {
         get { view?.bounds.origin ?? .zero }
         set { view?.bounds.origin = newValue }
     }
-    
+
     /// The insets applied to the content of the view.
     var contentInset: UIEdgeInsets {
         (view as? UIScrollView)?.adjustedContentInset ?? .zero
     }
-    
+
     /// The bounds of the view.
     var bounds: CGRect {
         view?.bounds ?? .zero
     }
-    
+
     /// The size of the view adjusted for the content inset.
     var adjustedSize: CGSize {
         bounds.size.inset(by: contentInset)
     }
-    
+
     /// The scale at which the content of the view is zoomed.
     var zoomScale: CGFloat {
         (view as? UIScrollView)?.zoomScale ?? 1
@@ -182,6 +182,8 @@ public class ComponentEngine {
     /// Reloads the view, rendering the component.
     /// - Parameter contentOffsetAdjustFn: An optional closure that adjusts the content offset after the layout is finished, but berfore any view is rendered.
     func reloadData(contentOffsetAdjustFn: (() -> CGPoint)? = nil) {
+
+
         guard !isReloading, allowReload else { return }
         isReloading = true
         defer {
@@ -199,7 +201,34 @@ public class ComponentEngine {
         } else if asyncLayout {
             layoutComponentAsync(contentOffsetAdjustFn: contentOffsetAdjustFn)
         } else {
-            layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            _latestObservationToken?.cancel()
+
+            let token = ObservationToken()
+            _latestObservationToken = token
+
+            withPerceptionTracking {
+                layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
+            } onChange: { [weak self] in
+                guard token.isCancelled == false, let self else {
+                    return
+                }
+
+                guard token === _latestObservationToken else {
+                    return
+                }
+
+                token.cancel()
+
+                trackReload()
+
+                MainActor.assertIsolated("MUST only update models on the main thread")
+                MainActor.assumeIsolated {
+                    RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
+                        self.observationReloadCount += 1
+                        self.reloadData(contentOffsetAdjustFn: nil)
+                    }
+                }
+            }
         }
     }
 
@@ -226,36 +255,9 @@ public class ComponentEngine {
             return
         }
 
-        _latestObservationToken?.cancel()
-
-        let token = ObservationToken()
-        _latestObservationToken = token
-
         let adjustedSize = self.adjustedSize
-        let renderNode = withPerceptionTracking {
-            EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
-                component.layout(Constraint(maxSize:adjustedSize))
-            }
-        } onChange: { [weak self] in
-            guard token.isCancelled == false, let self else {
-                return
-            }
-
-            guard token === _latestObservationToken else {
-                return
-            }
-
-            token.cancel()
-
-            trackReload()
-
-            MainActor.assertIsolated("MUST only update models on the main thread")
-            MainActor.assumeIsolated {
-                RunLoop.main.perform(inModes: [.common, .tracking, .default]) {
-                    self.observationReloadCount += 1
-                    self.layoutComponent(contentOffsetAdjustFn: nil)
-                }
-            }
+        let renderNode = EnvironmentValues.with(values: .init(\.currentComponentView, value: componentView)) {
+            component.layout(Constraint(maxSize:adjustedSize))
         }
 
         didFinishLayout(renderNode: renderNode, contentOffsetAdjustFn: contentOffsetAdjustFn)
@@ -521,10 +523,10 @@ extension ComponentEngine {
 //                token.cancel()
 //                self.onChange(apply: apply)
 //            }
-//            
+//
 //        }
 //    }
-//    
+//
 //    func observe(_ apply: @escaping () -> Void) {
 //        onChange(apply: apply)
 //    }
