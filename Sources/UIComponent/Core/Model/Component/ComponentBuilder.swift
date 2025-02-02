@@ -13,11 +13,11 @@ public protocol ComponentBuilder: Component {
     func build() -> ResultComponent
 }
 
+
 extension ComponentBuilder {
     public func layout(_ constraint: Constraint) -> ResultComponent.R {
         let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
-
-        let componentName = String(describing: type(of: self))
+        let componentName = typeName
 
         os_signpost(
             .begin,

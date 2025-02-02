@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		8DF17C4D2D4FD09E00FF2E0B /* UIComponentInstrumentation.instrdst */ = {isa = PBXFileReference; explicitFileType = com.apple.instruments.instrdst; includeInIndex = 0; path = UIComponentInstrumentation.instrdst; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DF17C4D2D4FD09E00FF2E0B /* ComponentBuilderBuilding.instrdst */ = {isa = PBXFileReference; explicitFileType = com.apple.instruments.instrdst; includeInIndex = 0; path = ComponentBuilderBuilding.instrdst; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DF17C782D50238B00FF2E0B /* ComponentEngineRendering.instrdst */ = {isa = PBXFileReference; explicitFileType = com.apple.instruments.instrdst; includeInIndex = 0; path = ComponentEngineRendering.instrdst; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		8DF17C4F2D4FD09E00FF2E0B /* UIComponentInstrumentation */ = {
+		8DF17C4F2D4FD09E00FF2E0B /* ComponentBuilderBuilding */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = UIComponentInstrumentation;
+			path = ComponentBuilderBuilding;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -22,7 +23,7 @@
 		8DF17C462D4FD09E00FF2E0B = {
 			isa = PBXGroup;
 			children = (
-				8DF17C4F2D4FD09E00FF2E0B /* UIComponentInstrumentation */,
+				8DF17C4F2D4FD09E00FF2E0B /* ComponentBuilderBuilding */,
 				8DF17C4E2D4FD09E00FF2E0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -30,7 +31,8 @@
 		8DF17C4E2D4FD09E00FF2E0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DF17C4D2D4FD09E00FF2E0B /* UIComponentInstrumentation.instrdst */,
+				8DF17C4D2D4FD09E00FF2E0B /* ComponentBuilderBuilding.instrdst */,
+				8DF17C782D50238B00FF2E0B /* ComponentEngineRendering.instrdst */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -38,9 +40,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8DF17C4C2D4FD09E00FF2E0B /* UIComponentInstrumentation */ = {
+		8DF17C4C2D4FD09E00FF2E0B /* ComponentBuilderBuilding */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8DF17C522D4FD09E00FF2E0B /* Build configuration list for PBXNativeTarget "UIComponentInstrumentation" */;
+			buildConfigurationList = 8DF17C522D4FD09E00FF2E0B /* Build configuration list for PBXNativeTarget "ComponentBuilderBuilding" */;
 			buildPhases = (
 				8DF17C4B2D4FD09E00FF2E0B /* Sources */,
 			);
@@ -49,13 +51,30 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				8DF17C4F2D4FD09E00FF2E0B /* UIComponentInstrumentation */,
+				8DF17C4F2D4FD09E00FF2E0B /* ComponentBuilderBuilding */,
 			);
-			name = UIComponentInstrumentation;
+			name = ComponentBuilderBuilding;
 			packageProductDependencies = (
 			);
 			productName = UIComponentInstrumentation;
-			productReference = 8DF17C4D2D4FD09E00FF2E0B /* UIComponentInstrumentation.instrdst */;
+			productReference = 8DF17C4D2D4FD09E00FF2E0B /* ComponentBuilderBuilding.instrdst */;
+			productType = "com.apple.product-type.instruments-package";
+		};
+		8DF17C772D50238B00FF2E0B /* ComponentEngineRendering */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8DF17C7C2D50238B00FF2E0B /* Build configuration list for PBXNativeTarget "ComponentEngineRendering" */;
+			buildPhases = (
+				8DF17C762D50238B00FF2E0B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ComponentEngineRendering;
+			packageProductDependencies = (
+			);
+			productName = ComponentEngineRendering;
+			productReference = 8DF17C782D50238B00FF2E0B /* ComponentEngineRendering.instrdst */;
 			productType = "com.apple.product-type.instruments-package";
 		};
 /* End PBXNativeTarget section */
@@ -68,6 +87,9 @@
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					8DF17C4C2D4FD09E00FF2E0B = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					8DF17C772D50238B00FF2E0B = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -86,13 +108,21 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DF17C4C2D4FD09E00FF2E0B /* UIComponentInstrumentation */,
+				8DF17C4C2D4FD09E00FF2E0B /* ComponentBuilderBuilding */,
+				8DF17C772D50238B00FF2E0B /* ComponentEngineRendering */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8DF17C4B2D4FD09E00FF2E0B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8DF17C762D50238B00FF2E0B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -140,6 +170,30 @@
 			};
 			name = Release;
 		};
+		8DF17C7D2D50238B00FF2E0B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 72MWNL29YV;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Instruments/Packages";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Debug;
+		};
+		8DF17C7E2D50238B00FF2E0B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 72MWNL29YV;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Instruments/Packages";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -152,11 +206,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8DF17C522D4FD09E00FF2E0B /* Build configuration list for PBXNativeTarget "UIComponentInstrumentation" */ = {
+		8DF17C522D4FD09E00FF2E0B /* Build configuration list for PBXNativeTarget "ComponentBuilderBuilding" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8DF17C532D4FD09E00FF2E0B /* Debug */,
 				8DF17C542D4FD09E00FF2E0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8DF17C7C2D50238B00FF2E0B /* Build configuration list for PBXNativeTarget "ComponentEngineRendering" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8DF17C7D2D50238B00FF2E0B /* Debug */,
+				8DF17C7E2D50238B00FF2E0B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

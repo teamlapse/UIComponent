@@ -17,3 +17,9 @@ public protocol Component<R> {
     /// - Returns: A `RenderNode` representing the laid out component.
     func layout(_ constraint: Constraint) -> R
 }
+
+extension Component {
+    var typeName: String {
+        String(describing: type(of: self))
+    }
+}

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<package>
+    <id>com.lapse.ComponentBuilderBuilding</id>
+    <title>Build Components</title>
+    <owner>
+        <name>Alex Little</name>
+    </owner>
+
+    <os-signpost-interval-schema>
+        <id>component-layout-schema</id>
+        <title>Component Layout</title>
+
+        <subsystem>"com.lapse.UIComponent"</subsystem>
+        <category>"UIComponent"</category>
+        <name>"ComponentBuilder"</name>
+
+        <start-pattern>
+            <message>"Component:" ?component-name</message>
+        </start-pattern>
+        <end-pattern>
+            <message>"Complete"</message>
+        </end-pattern>
+
+        <column>
+            <mnemonic>component-name-event</mnemonic>
+            <title>Component</title>
+            <type>string</type>
+            <expression>?component-name</expression>
+        </column>
+    </os-signpost-interval-schema>
+
+    <os-signpost-interval-schema>
+        <id>component-render-schema</id>
+        <title>Component Render</title>
+
+        <subsystem>"com.lapse.UIComponent"</subsystem>
+        <category>"UIComponent"</category>
+        <name>"ComponentEngine"</name>
+
+        <start-pattern>
+            <message>"Render:" ?component-name</message>
+        </start-pattern>
+        <end-pattern>
+            <message>"Rendered"</message>
+        </end-pattern>
+
+        <column>
+            <mnemonic>rendered-name-event</mnemonic>
+            <title>Component</title>
+            <type>string</type>
+            <expression>?component-name</expression>
+        </column>
+    </os-signpost-interval-schema>
+
+    <instrument>
+        <id>com.lapse.UIComponentInstrumentation.LayoutInstrument</id>
+        <title>ComponentBuilder</title>
+        <category>Behavior</category>
+        <purpose>Instrument for tracking build calls for components</purpose>
+        <icon>Generic</icon>
+
+        <create-table>
+            <id>component-layout-table</id>
+            <schema-ref>component-layout-schema</schema-ref>
+        </create-table>
+
+        <graph>
+            <title>ComponentBuilder Build</title>
+            <lane>
+                <title>UIComponent</title>
+                <table-ref>component-layout-table</table-ref>
+
+                <plot>
+                    <value-from>component-name-event</value-from>
+                </plot>
+            </lane>
+        </graph>
+
+        <aggregation>
+            <title>Timing Summary</title>
+            <table-ref>component-layout-table</table-ref>
+
+            <hierarchy>
+                <level>
+                    <column>component-name-event</column>
+                </level>
+            </hierarchy>
+
+            <column>
+                <count/>
+            </column>
+
+            <column>
+                <title>Total Duration</title>
+                <sum>duration</sum>
+            </column>
+
+            <column>
+                <title>Min Duration</title>
+                <min>duration</min>
+            </column>
+
+            <column>
+                <title>Avg Duration</title>
+                <average>duration</average>
+            </column>
+
+            <column>
+                <title>Max Duration</title>
+                <max>duration</max>
+            </column>
+
+            <column>
+                <title>Std Dev Duration</title>
+                <std-dev>duration</std-dev>
+            </column>
+        </aggregation>
+
+        <list>
+            <title>Intervals</title>
+            <table-ref>component-layout-table</table-ref>
+
+            <column>start</column>
+            <column>duration</column>
+            <column>component-name-event</column>
+        </list>
+
+    </instrument>
+
+    <instrument>
+        <id>com.lapse.ComponentEngineRendering.RenderViews</id>
+        <title>Render Components</title>
+        <category>Behavior</category>
+        <purpose>Instrument for tracking rendering in ComponentEngine by it's root component</purpose>
+        <icon>Generic</icon>
+
+        <create-table>
+            <id>component-render-table</id>
+            <schema-ref>component-render-schema</schema-ref>
+        </create-table>
+
+        <graph>
+            <title>ComponentEnginer RenderViews</title>
+            <lane>
+                <title>UIComponent</title>
+                <table-ref>component-render-table</table-ref>
+
+                <plot>
+                    <value-from>rendered-name-event</value-from>
+                </plot>
+            </lane>
+        </graph>
+
+        <aggregation>
+            <title>Timing Summary</title>
+            <table-ref>component-render-table</table-ref>
+
+            <hierarchy>
+                <level>
+                    <column>rendered-name-event</column>
+                </level>
+            </hierarchy>
+
+            <column>
+                <count/>
+            </column>
+
+            <column>
+                <title>Total Duration</title>
+                <sum>duration</sum>
+            </column>
+
+            <column>
+                <title>Min Duration</title>
+                <min>duration</min>
+            </column>
+
+            <column>
+                <title>Avg Duration</title>
+                <average>duration</average>
+            </column>
+
+            <column>
+                <title>Max Duration</title>
+                <max>duration</max>
+            </column>
+
+            <column>
+                <title>Std Dev Duration</title>
+                <std-dev>duration</std-dev>
+            </column>
+        </aggregation>
+
+        <list>
+            <title>Intervals</title>
+            <table-ref>component-render-table</table-ref>
+
+            <column>start</column>
+            <column>duration</column>
+            <column>rendered-name-event</column>
+        </list>
+
+    </instrument>
+
+</package>
+
