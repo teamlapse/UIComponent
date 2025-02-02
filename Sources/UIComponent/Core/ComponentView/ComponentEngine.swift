@@ -441,7 +441,7 @@ public class ComponentEngine {
         }
     }
 
-    public var debugReloadsDisabled: Bool = false
+    public var debugReloadsEnabled: Bool = false
     public var debugReloadsUseBreakpoint: Bool = false
     public var debugReloadThreshold: ReloadThreshold = .default
 
@@ -450,7 +450,7 @@ public class ComponentEngine {
 
     private func trackReload() {
 #if DEBUG
-        guard !debugReloadsDisabled else { return }
+        guard debugReloadsEnabled else { return }
         let now = Date()
         debugReloadTimestamps.append(now)
 

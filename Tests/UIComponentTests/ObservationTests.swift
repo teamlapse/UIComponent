@@ -176,6 +176,7 @@ struct ObservationTests {
 
     @Test func testExcessiveReloads() throws {
         let view = ComponentView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
+        view.engine.debugReloadsEnabled = true 
         let model = TestModel(value: "initial")
 
         // Configure debug settings
