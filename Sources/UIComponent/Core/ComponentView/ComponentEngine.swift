@@ -4,6 +4,8 @@
 import UIKit
 import Perception
 
+import OSLog
+
 #if DEBUG
 import IssueReporting
 #endif
@@ -449,4 +451,8 @@ public class ComponentEngine: NSObject {
         }
 #endif
     }
+}
+
+enum SignpostLog {
+    static let componentLayout = OSLog(subsystem: "com.lapse.UIComponent", category: "UIComponent")
 }

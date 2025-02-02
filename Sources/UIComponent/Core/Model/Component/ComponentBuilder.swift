@@ -1,6 +1,7 @@
 //  Created by Luke Zhao on 8/23/20.
 
 import Foundation
+import OSLog
 
 /// A Component that builds a Component.
 /// Use this instead of ``Component`` when you want to implement ``build()`` instead of ``Component/layout(_:)``.
@@ -14,6 +15,31 @@ public protocol ComponentBuilder: Component {
 
 extension ComponentBuilder {
     public func layout(_ constraint: Constraint) -> ResultComponent.R {
-        build().layout(constraint)
+        let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
+
+        let componentName = String(describing: type(of: self))
+
+        os_signpost(
+            .begin,
+            log: SignpostLog.componentLayout,
+            name: "ComponentBuilder",
+            signpostID: signpostId,
+            "Component:%{public}@",
+            componentName
+        )
+
+        let built = build()
+
+        let renderNode = built.layout(constraint)
+
+        os_signpost(
+            .end,
+            log: SignpostLog.componentLayout,
+            name: "ComponentBuilder",
+            signpostID: signpostId,
+            "Complete"
+        )
+
+        return renderNode
     }
 }
