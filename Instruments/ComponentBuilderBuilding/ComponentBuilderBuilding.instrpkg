@@ -12,7 +12,7 @@
 
         <subsystem>"com.lapse.UIComponent"</subsystem>
         <category>"UIComponent"</category>
-        <name>"ComponentBuilder"</name>
+        <name>"Build Components"</name>
 
         <start-pattern>
             <message>"Component:" ?component-name</message>
@@ -31,7 +31,7 @@
 
     <os-signpost-interval-schema>
         <id>component-render-schema</id>
-        <title>Component Render</title>
+        <title>Render Components</title>
 
         <subsystem>"com.lapse.UIComponent"</subsystem>
         <category>"UIComponent"</category>
@@ -54,7 +54,7 @@
 
     <instrument>
         <id>com.lapse.UIComponentInstrumentation.LayoutInstrument</id>
-        <title>ComponentBuilder</title>
+        <title>Build Components</title>
         <category>Behavior</category>
         <purpose>Instrument for tracking build calls for components</purpose>
         <icon>Generic</icon>
