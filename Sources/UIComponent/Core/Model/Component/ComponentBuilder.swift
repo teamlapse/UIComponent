@@ -16,30 +16,34 @@ public protocol ComponentBuilder: Component {
 
 extension ComponentBuilder {
     public func layout(_ constraint: Constraint) -> ResultComponent.R {
-        let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
-        let componentName = typeName
+        if UIComponentDebugOptions.enableDebugSignposts {
+            let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
+            let componentName = typeName
 
-        os_signpost(
-            .begin,
-            log: SignpostLog.componentLayout,
-            name: "ComponentBuilder",
-            signpostID: signpostId,
-            "Component:%{public}@",
-            componentName
-        )
+            os_signpost(
+                .begin,
+                log: SignpostLog.componentLayout,
+                name: "ComponentBuilder",
+                signpostID: signpostId,
+                "Component:%{public}@",
+                componentName
+            )
 
-        let built = build()
+            let built = build()
 
-        let renderNode = built.layout(constraint)
+            let renderNode = built.layout(constraint)
 
-        os_signpost(
-            .end,
-            log: SignpostLog.componentLayout,
-            name: "ComponentBuilder",
-            signpostID: signpostId,
-            "Complete"
-        )
+            os_signpost(
+                .end,
+                log: SignpostLog.componentLayout,
+                name: "ComponentBuilder",
+                signpostID: signpostId,
+                "Complete"
+            )
 
-        return renderNode
+            return renderNode
+        } else {
+            return build().layout(constraint)
+        }
     }
 }

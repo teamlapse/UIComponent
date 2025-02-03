@@ -10,6 +10,10 @@ import OSLog
 import IssueReporting
 #endif
 
+public enum UIComponentDebugOptions {
+    public static var enableDebugSignposts = false
+}
+
 /// Protocol defining a delegate responsible for determining if a component view should be reloaded.
 public protocol ComponentReloadDelegate: AnyObject {
     /// Asks the delegate if the component view should be reloaded.
@@ -261,9 +265,8 @@ public class ComponentEngine: NSObject {
         guard let componentView = view, allowReload, !isRendering, let renderNode else { return }
 
         let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
-        let componentName = component.flatMap { $0.typeName } ?? "Unknown"
-
-        if updateViews {
+        if UIComponentDebugOptions.enableDebugSignposts, updateViews {
+            let componentName = component.flatMap { $0.typeName } ?? "Unknown"
             os_signpost(
                 .begin,
                 log: SignpostLog.componentLayout,
@@ -275,7 +278,7 @@ public class ComponentEngine: NSObject {
         }
 
         defer {
-            if updateViews {
+            if UIComponentDebugOptions.enableDebugSignposts, updateViews {
                 os_signpost(
                     .end,
                     log: SignpostLog.componentLayout,
