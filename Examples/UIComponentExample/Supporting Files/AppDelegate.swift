@@ -2,12 +2,14 @@
 
 import UIComponent
 import UIKit
+import Perception
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        PerceptionSignpost.enabled = true
         // Override point for customization after application launch.
         TappableViewConfiguration.default = TappableViewConfiguration { view, isHighlighted in
             let scale: CGFloat = isHighlighted ? 0.9 : 1.0

@@ -107,6 +107,7 @@
 
             <column>
                 <title>Max Duration</title>
+
                 <max>duration</max>
             </column>
 
