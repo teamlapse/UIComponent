@@ -32,7 +32,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/teamlapse/swift-perception",
       "state" : {
-        "revision" : "cbb4f56ef3e18ed054e781e68e359699c9399151"
+        "revision" : "925492eb5ce6191dd9900f055d9811f5ea715ad8"
       }
     },
     {
