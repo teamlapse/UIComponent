@@ -34,6 +34,8 @@ public class ComponentEngine: NSObject {
 
     private static let asyncLayoutQueue = DispatchQueue(label: "com.component.layout", qos: .userInteractive)
 
+    public var debugName: String?
+
     /// A flag indicating whether the layout should be performed asynchronously on a background thread
     public var asyncLayout = false
 
@@ -206,8 +208,21 @@ public class ComponentEngine: NSObject {
                     layoutComponent(contentOffsetAdjustFn: contentOffsetAdjustFn)
                 }
             } sideEffect: { [weak self] in
-                self?.trackReload()
-                self?.observationReloadCount += 1
+                guard let self else { return }
+                if UIComponentDebugOptions.enableDebugSignposts {
+                    let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
+                    let componentName = debugName ?? component.flatMap { $0.typeName } ?? "Unknown"
+                    os_signpost(
+                        .event,
+                        log: SignpostLog.componentLayout,
+                        name: "ComponentEngine-OnChange",
+                        signpostID: signpostId,
+                        "Component:%{public}@",
+                        componentName
+                    )
+                }
+                self.trackReload()
+                self.observationReloadCount += 1
             }
         }
     }
@@ -266,7 +281,7 @@ public class ComponentEngine: NSObject {
 
         let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
         if UIComponentDebugOptions.enableDebugSignposts, updateViews {
-            let componentName = component.flatMap { $0.typeName } ?? "Unknown"
+            let componentName = debugName ?? component.flatMap { $0.typeName } ?? "Unknown"
             os_signpost(
                 .begin,
                 log: SignpostLog.componentLayout,
