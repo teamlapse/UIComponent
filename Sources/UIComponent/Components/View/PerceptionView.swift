@@ -12,9 +12,10 @@ extension Component {
     func perceptionView(width: SizeStrategy, height: SizeStrategy) -> PerceptionViewWithSize {
         perceptionView()
             .size(width: width, height: height)
+            .with(\.engine.debugName, String(describing: type(of: self)))
     }
 
-    public typealias PerceptionViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>>>
+    public typealias PerceptionViewWithSize = ModifierComponent<ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentView>>>>, KeyPathUpdateRenderNode<String?, AnyRenderNodeOfView<ComponentView>>>
 }
 
 extension Component {
@@ -27,9 +28,10 @@ extension Component {
     func perceptionScrollView(width: SizeStrategy, height: SizeStrategy) -> PerceptionScrollViewWithSize {
         perceptionScrollView()
             .size(width: width, height: height)
+            .with(\.engine.debugName, String(describing: type(of: self)))
     }
 
-    public typealias PerceptionScrollViewWithSize = ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>>>
+    public typealias PerceptionScrollViewWithSize = ModifierComponent<ConstraintOverrideComponent<ModifierComponent<ViewComponent<ComponentScrollView>, KeyPathUpdateRenderNode<(any Component)?, ViewRenderNode<ComponentScrollView>>>>, KeyPathUpdateRenderNode<String?, AnyRenderNodeOfView<ComponentScrollView>>>
 }
 
 
