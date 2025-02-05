@@ -10,6 +10,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         PerceptionSignpost.enabled = true
+        UIComponentDebugOptions.enableDebugSignposts = true
+
         // Override point for customization after application launch.
         TappableViewConfiguration.default = TappableViewConfiguration { view, isHighlighted in
             let scale: CGFloat = isHighlighted ? 0.9 : 1.0

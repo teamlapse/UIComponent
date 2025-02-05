@@ -6,6 +6,26 @@
         <name>Alex Little</name>
     </owner>
 
+    <os-signpost-point-schema>
+        <id>component-onchange-schema</id>
+        <title>Component OnChange Schema</title>
+
+        <subsystem>"com.lapse.UIComponent"</subsystem>
+        <category>"UIComponent"</category>
+        <name>"ComponentEngine-OnChange"</name>
+
+        <pattern>
+            <message>"Component:" ?component-name</message>
+        </pattern>
+
+        <column>
+            <mnemonic>component-name-event</mnemonic>
+            <title>Component</title>
+            <type>string</type>
+            <expression>?component-name</expression>
+        </column>
+    </os-signpost-point-schema>
+
     <os-signpost-interval-schema>
         <id>component-layout-schema</id>
         <title>Component Layout</title>
@@ -51,6 +71,41 @@
             <expression>?component-name</expression>
         </column>
     </os-signpost-interval-schema>
+
+    <instrument>
+        <id>com.lapse.UIComponentInstrumentation.OnChangeInstrumentation</id>
+        <title>ComponentEngine OnChange Events</title>
+        <category>Behavior</category>
+        <purpose>Instrument for tracking OnChange in ComponentEngine</purpose>
+        <icon>Generic</icon>
+
+        <create-table>
+            <id>component-onchange-table</id>
+            <schema-ref>component-onchange-schema</schema-ref>
+        </create-table>
+
+        <graph>
+            <title>ComponentEngine OnChange</title>
+            <lane>
+                <title>Changes</title>
+                <table-ref>component-onchange-table</table-ref>
+
+                <histogram>
+                    <nanoseconds-per-bucket>10000000</nanoseconds-per-bucket>
+                    <count/>
+                </histogram>
+            </lane>
+        </graph>
+
+        <list>
+            <title>Intervals</title>
+            <table-ref>component-onchange-table</table-ref>
+
+            <column>timestamp</column>
+            <column>component-name-event</column>
+        </list>
+
+    </instrument>
 
     <instrument>
         <id>com.lapse.UIComponentInstrumentation.LayoutInstrument</id>

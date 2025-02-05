@@ -32,7 +32,28 @@
     (slot output-table (type INTEGER))
 )
 
-(defrule MODELER::start-interval-for-system-1 
+(defrule RECORDER::record-point-for-system-1 
+    (table-attribute (table-id ?autoOutput_) (has schema component-onchange-schema))
+    (table (table-id ?autoOutput_) (side append))
+    (os-signpost 
+            (category "UIComponent")
+            (subsystem "com.lapse.UIComponent")
+            (time ?autoPointTimeBinding_&~0)
+            (event-type "Event")
+            (message$ "Component:" ?component-name)
+            (identifier ?autoSignpostIdentifier_)
+            (name "ComponentEngine-OnChange")
+    )
+
+    =>
+
+    (create-new-row ?autoOutput_)
+
+    (set-column timestamp ?autoPointTimeBinding_)
+    (set-column component-name-event ?component-name)
+)
+
+(defrule MODELER::start-interval-for-system-2 
     (table-attribute (table-id ?autoOutput_) (has schema component-layout-schema))
     (table (table-id ?autoOutput_) (side append))
     (or (table-attribute (table-id ?autoOutput_) (has target-pid ?target-pid))
@@ -64,14 +85,14 @@
                (identifier ?autoSignpostIdentifier_)
                (process ?autoProcessBinding_)
                (name "ComponentBuilder")
-               (rule-system-serial 1)
+               (rule-system-serial 2)
                (output-table ?autoOutput_)
                (layout-category ?autoLayoutCat_)
                (layout-id (reserve-layout-lane ?autoLayoutCat_))
             ))
 )
 
-(defrule RECORDER::end-interval-for-system-1 
+(defrule RECORDER::end-interval-for-system-2 
     (table (table-id ?autoOutput_) (side append))
     (or (table-attribute (table-id ?autoOutput_) (has target-pid ?target-pid))
         (and (not (table-attribute (table-id ?autoOutput_) (has target-pid $?)))
@@ -87,7 +108,7 @@
                 (identifier ?autoSignpostIdentifier_)
                 (process ?autoProcessBinding_)
                 (name "ComponentBuilder")
-                (rule-system-serial 1)
+                (rule-system-serial 2)
                 (layout-id ?layout-id_)
                 (layout-category $?autoLayoutCat_)
                 (output-table ?autoOutput_)
@@ -101,13 +122,13 @@
         (category "UIComponent")
         (time ?autoEndTimeBinding_&~0)
     )
-    (not (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 1)))
-    (matched-interval (rule-system-serial 1) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_))
+    (not (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 2)))
+    (matched-interval (rule-system-serial 2) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_))
 
     =>
 
     (retract ?o)
-    (assert (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 1)))
+    (assert (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 2)))
     (close-layout-lane-reservation ?layout-id_ $?autoLayoutCat_)
     (create-new-row ?autoOutput_)
 
@@ -117,7 +138,7 @@
     (set-column component-name-event ?component-name)
 )
 
-(defrule RECORDER::speculation-for-system-1
+(defrule RECORDER::speculation-for-system-2
     (speculate (event-horizon ?autoHorizonBinding_))
     (open-start-interval (output-table ?autoOutput_) (layout-id ?autoLayoutID_)
                          (category "UIComponent")
@@ -128,7 +149,7 @@
                          (identifier ?autoSignpostIdentifier_)
                          (process ?autoProcessBinding_)
                          (name "ComponentBuilder")
-                         (rule-system-serial 1)
+                         (rule-system-serial 2)
     )
     =>
     (create-new-row ?autoOutput_)
@@ -139,30 +160,30 @@
     (if (< ?autoStartTimeBinding_ ?*modeler-horizon*) then (bind ?*modeler-horizon* ?autoStartTimeBinding_))
 )
 
-(defrule MODELER::signpost-match-detected-1
-    (logical ?o <- (open-start-interval (time ?start) (rule-system-serial 1) (thread ?thread) (process ?process)
+(defrule MODELER::signpost-match-detected-2
+    (logical ?o <- (open-start-interval (time ?start) (rule-system-serial 2) (thread ?thread) (process ?process)
                                         (name ?name) (identifier ?signpost-id) (output-table ?autoOutput_)
           )
     (or
       (and ?f <- (os-signpost (time ?end&~?start) (name ?name) (identifier ?signpost-id) (event-type "End") (scope "Thread") (thread ?thread))
-           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 1)
+           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 2)
                                      (output-table ?autoOutput_) (thread ?thread)))
       )
       (and ?f <- (os-signpost (time ?end&~?start) (name ?name) (identifier ?signpost-id) (event-type "End") (scope "Process"|"") (process ?process))
-           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 1)
+           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 2)
                                      (output-table ?autoOutput_) (process ?proc)))
       )
       (and ?f <- (os-signpost (time ?end&~?start) (name ?name) (identifier ?signpost-id) (event-type "End") (scope "System"))
-           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 1)
+           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 2)
                                      (output-table ?autoOutput_)))
       )
     ))
-    (not (matched-interval (rule-system-serial 1) (open-fact ?o) (output-table ?autoOutput_)))
+    (not (matched-interval (rule-system-serial 2) (open-fact ?o) (output-table ?autoOutput_)))
     =>
-    (assert (matched-interval (rule-system-serial 1) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_)))
+    (assert (matched-interval (rule-system-serial 2) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_)))
 )
 
-(defrule MODELER::start-interval-for-system-2 
+(defrule MODELER::start-interval-for-system-3 
     (table-attribute (table-id ?autoOutput_) (has schema component-render-schema))
     (table (table-id ?autoOutput_) (side append))
     (or (table-attribute (table-id ?autoOutput_) (has target-pid ?target-pid))
@@ -194,14 +215,14 @@
                (identifier ?autoSignpostIdentifier_)
                (process ?autoProcessBinding_)
                (name "ComponentEngine")
-               (rule-system-serial 2)
+               (rule-system-serial 3)
                (output-table ?autoOutput_)
                (layout-category ?autoLayoutCat_)
                (layout-id (reserve-layout-lane ?autoLayoutCat_))
             ))
 )
 
-(defrule RECORDER::end-interval-for-system-2 
+(defrule RECORDER::end-interval-for-system-3 
     (table (table-id ?autoOutput_) (side append))
     (or (table-attribute (table-id ?autoOutput_) (has target-pid ?target-pid))
         (and (not (table-attribute (table-id ?autoOutput_) (has target-pid $?)))
@@ -217,7 +238,7 @@
                 (identifier ?autoSignpostIdentifier_)
                 (process ?autoProcessBinding_)
                 (name "ComponentEngine")
-                (rule-system-serial 2)
+                (rule-system-serial 3)
                 (layout-id ?layout-id_)
                 (layout-category $?autoLayoutCat_)
                 (output-table ?autoOutput_)
@@ -231,13 +252,13 @@
         (category "UIComponent")
         (time ?autoEndTimeBinding_&~0)
     )
-    (not (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 2)))
-    (matched-interval (rule-system-serial 2) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_))
+    (not (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 3)))
+    (matched-interval (rule-system-serial 3) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_))
 
     =>
 
     (retract ?o)
-    (assert (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 2)))
+    (assert (consumed-end (end-fact ?f) (output-table ?autoOutput_) (rule-system-serial 3)))
     (close-layout-lane-reservation ?layout-id_ $?autoLayoutCat_)
     (create-new-row ?autoOutput_)
 
@@ -247,7 +268,7 @@
     (set-column rendered-name-event ?component-name)
 )
 
-(defrule RECORDER::speculation-for-system-2
+(defrule RECORDER::speculation-for-system-3
     (speculate (event-horizon ?autoHorizonBinding_))
     (open-start-interval (output-table ?autoOutput_) (layout-id ?autoLayoutID_)
                          (category "UIComponent")
@@ -258,7 +279,7 @@
                          (identifier ?autoSignpostIdentifier_)
                          (process ?autoProcessBinding_)
                          (name "ComponentEngine")
-                         (rule-system-serial 2)
+                         (rule-system-serial 3)
     )
     =>
     (create-new-row ?autoOutput_)
@@ -269,26 +290,26 @@
     (if (< ?autoStartTimeBinding_ ?*modeler-horizon*) then (bind ?*modeler-horizon* ?autoStartTimeBinding_))
 )
 
-(defrule MODELER::signpost-match-detected-2
-    (logical ?o <- (open-start-interval (time ?start) (rule-system-serial 2) (thread ?thread) (process ?process)
+(defrule MODELER::signpost-match-detected-3
+    (logical ?o <- (open-start-interval (time ?start) (rule-system-serial 3) (thread ?thread) (process ?process)
                                         (name ?name) (identifier ?signpost-id) (output-table ?autoOutput_)
           )
     (or
       (and ?f <- (os-signpost (time ?end&~?start) (name ?name) (identifier ?signpost-id) (event-type "End") (scope "Thread") (thread ?thread))
-           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 2)
+           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 3)
                                      (output-table ?autoOutput_) (thread ?thread)))
       )
       (and ?f <- (os-signpost (time ?end&~?start) (name ?name) (identifier ?signpost-id) (event-type "End") (scope "Process"|"") (process ?process))
-           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 2)
+           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 3)
                                      (output-table ?autoOutput_) (process ?proc)))
       )
       (and ?f <- (os-signpost (time ?end&~?start) (name ?name) (identifier ?signpost-id) (event-type "End") (scope "System"))
-           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 2)
+           (not (open-start-interval (time ?other-start&:(> ?other-start ?start)) (name ?name) (identifier ?signpost-id) (rule-system-serial 3)
                                      (output-table ?autoOutput_)))
       )
     ))
-    (not (matched-interval (rule-system-serial 2) (open-fact ?o) (output-table ?autoOutput_)))
+    (not (matched-interval (rule-system-serial 3) (open-fact ?o) (output-table ?autoOutput_)))
     =>
-    (assert (matched-interval (rule-system-serial 2) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_)))
+    (assert (matched-interval (rule-system-serial 3) (open-fact ?o) (end-fact ?f) (output-table ?autoOutput_)))
 )
 
