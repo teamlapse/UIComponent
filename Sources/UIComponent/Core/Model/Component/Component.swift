@@ -6,7 +6,7 @@ import Foundation
 /// The only method that it require is ``Component/layout(_:)`` which calculates
 /// the layout of the component and generate a ``RenderNode``
 @dynamicMemberLookup
-public protocol Component<R> {
+public protocol Component<R>: CustomStringConvertible {
     /// The type of `RenderNode` that this component produces.
     associatedtype R: RenderNode
 
@@ -19,7 +19,7 @@ public protocol Component<R> {
 }
 
 extension Component {
-    var typeName: String {
+    public var description: String {
         String(describing: type(of: self))
     }
 }

@@ -13,12 +13,11 @@ public protocol ComponentBuilder: Component {
     func build() -> ResultComponent
 }
 
-
 extension ComponentBuilder {
     public func layout(_ constraint: Constraint) -> ResultComponent.R {
         if UIComponentDebugOptions.enableDebugSignposts {
             let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
-            let componentName = typeName
+            let componentName = description
 
             os_signpost(
                 .begin,

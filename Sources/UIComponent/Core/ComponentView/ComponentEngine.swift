@@ -211,7 +211,7 @@ public class ComponentEngine: NSObject {
                 guard let self else { return }
                 if UIComponentDebugOptions.enableDebugSignposts {
                     let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
-                    let componentName = debugName ?? component.flatMap { $0.typeName } ?? "Unknown"
+                    let componentName = debugName ?? component.flatMap { $0.description } ?? "Unknown"
                     os_signpost(
                         .event,
                         log: SignpostLog.componentLayout,
@@ -281,7 +281,7 @@ public class ComponentEngine: NSObject {
 
         let signpostId = OSSignpostID(log: SignpostLog.componentLayout)
         if UIComponentDebugOptions.enableDebugSignposts, updateViews {
-            let componentName = debugName ?? component.flatMap { $0.typeName } ?? "Unknown"
+            let componentName = debugName ?? component.flatMap { $0.description } ?? "Unknown"
             os_signpost(
                 .begin,
                 log: SignpostLog.componentLayout,
