@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
-        .package(url: "https://github.com/teamlapse/swift-perception", revision: "cb958770729e352d709927c29fd5b9a28c89594b"),
+        .package(url: "https://github.com/teamlapse/swift-perception", revision: "c6f0747ec10807978e71c92d2aa62b5bea45b6bd"),
         .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     ],
     targets: [
