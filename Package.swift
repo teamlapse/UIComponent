@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "UIComponent",
     platforms: [
-        .iOS("13.0"),
+        .iOS("17.0"),
         .tvOS("15.0"),
     ],
     products: [
@@ -16,7 +16,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
-        .package(url: "https://github.com/teamlapse/swift-perception", revision: "b5500c32b22ea461cb1a2298f94a6ad6c93a4df2"),
         .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     ],
     targets: [
@@ -26,7 +25,6 @@ let package = Package(
             name: "UIComponent",
             dependencies: [
                 .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-                .product(name: "Perception", package: "swift-perception"),
                 .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
             ]
         ),

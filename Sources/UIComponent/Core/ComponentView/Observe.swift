@@ -1,5 +1,4 @@
 import ConcurrencyExtras
-import Perception
 import Foundation
 
 func observe(
@@ -28,7 +27,7 @@ private func onChange(
     _ apply: @escaping @Sendable () -> Void,
     task: @escaping @Sendable (_ operation: @escaping @Sendable () -> Void) -> Void
 ) {
-    withPerceptionTracking {
+    withObservationTracking {
         apply()
     } onChange: {
         task {
